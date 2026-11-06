@@ -161,6 +161,15 @@
   .sum dt{ font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:#8a8a8a; font-weight:600; margin-top:10px; }
   .sum dd{ font-size:15px; white-space:pre-wrap; }
   .toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:calc(var(--safe-bottom) + 90px); background:var(--charcoal); color:#fff; padding:12px 18px; border-radius:2px; font-size:14px; z-index:50; max-width:90%; }
+  /* pannelli (card solo bordo) */
+  .panel{ border:1px solid var(--beige); border-radius:2px; padding:22px 18px 8px; margin-top:28px; }
+  .panel > h2{ margin:0 0 14px; }
+  .panel .fchips{ margin:0 -18px; padding-left:18px; padding-right:18px; }
+  .panel .dayhead:first-of-type{ margin-top:14px; }
+  .panel .ag,.panel .client{ background:transparent; border:0; border-bottom:1px solid var(--beige); border-radius:0; margin:0; padding:14px 0; }
+  .panel .ag:last-child,.panel .client:last-child{ border-bottom:0; }
+  .panel .empty{ padding:22px 10px 26px; }
+  .linkact{ display:block; width:100%; background:none; border:0; font:600 14px 'Manrope',sans-serif; color:var(--charcoal); text-decoration:underline; text-underline-offset:4px; padding:14px 0 4px; min-height:44px; cursor:pointer; text-align:center; }
   /* agenda / stati */
   .fchips{ display:flex; gap:8px; overflow-x:auto; padding:2px 0 8px; margin:0 calc(var(--safe-x) * -1); padding-left:var(--safe-x); padding-right:var(--safe-x); -webkit-overflow-scrolling:touch; scrollbar-width:none; }
   .fchips::-webkit-scrollbar{ display:none; }
@@ -483,12 +492,12 @@ function homeList(){
 function viewHome(){
   return `<span class="eyebrow">Primo incontro</span><h1>Consulenza e prova trucco</h1>
   <p class="lead">Agenda delle prove e schede cliente. I dati restano solo su questo dispositivo.</p>
-  <div class="stack"><button class="btn" data-act="newappt">+ Nuovo appuntamento</button><button class="btn ghost" data-act="new">+ Nuova consulenza subito</button></div>
-  <h2 style="margin-top:34px">Agenda</h2>
-  <div id="agenda">${agendaHtml()}</div>
-  <h2 style="margin-top:38px">Schede salvate</h2>
+  <button class="btn" data-act="newappt">+ Nuovo appuntamento</button>
+  <button class="linkact" data-act="new">oppure inizia subito una consulenza</button>
+  <section class="panel"><h2>Agenda</h2><div id="agenda">${agendaHtml()}</div></section>
+  <section class="panel"><h2>Schede salvate</h2>
   <input type="search" id="search" placeholder="Nome, cognome, email o cellulare" value="${esc(S.q)}" autocomplete="off" autocapitalize="off" enterkeyhint="search">
-  <div id="clist" style="margin-top:16px">${homeList()}</div>`;
+  <div id="clist" style="margin-top:16px">${homeList()}</div></section>`;
 }
 
 function viewAnag(){
