@@ -57,7 +57,7 @@
 
   /* form */
   label.f{ display:block; font-size:12px; letter-spacing:.12em; text-transform:uppercase; font-weight:600; color:#6b6b6b; margin:20px 0 8px; }
-  input[type=text],input[type=email],input[type=tel],input[type=date],textarea,select{
+  input[type=text],input[type=email],input[type=tel],input[type=date],input[type=time],textarea,select{
     width:100%; padding:14px 14px; border:1px solid var(--beige); border-radius:2px; background:#fff;
     font-family:'Manrope',sans-serif; font-size:16px; /* 16px: evita lo zoom automatico su iOS */ color:var(--charcoal);
     -webkit-appearance:none; appearance:none;
@@ -155,7 +155,18 @@
   .sum dt{ font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:#8a8a8a; font-weight:600; margin-top:10px; }
   .sum dd{ font-size:15px; white-space:pre-wrap; }
   .toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:calc(var(--safe-bottom) + 90px); background:var(--charcoal); color:#fff; padding:12px 18px; border-radius:2px; font-size:14px; z-index:50; max-width:90%; }
-  input[type=file]{ display:none; }
+  input[type=file]{ position:absolute; width:1px; height:1px; opacity:0; overflow:hidden; pointer-events:none; }
+  input[type=time],input[type=date]{ min-height:50px; }
+  details.how{ background:var(--tint-sage); border-radius:2px; margin:0 0 14px; }
+  details.how summary{ list-style:none; cursor:pointer; padding:13px 16px; min-height:44px; font-size:14px; font-weight:600; color:#4f5f52; display:flex; justify-content:space-between; align-items:center; }
+  details.how summary::-webkit-details-marker{ display:none; }
+  details.how summary::after{ content:'+'; font-size:20px; font-weight:400; }
+  details.how[open] summary::after{ content:'–'; }
+  details.how .hb{ padding:0 16px 14px; font-size:14px; color:#3f3f3f; }
+  details.how .hb p{ margin-top:8px; }
+  details.how .hb ul{ margin:8px 0 0 18px; }
+  details.how .hb li{ margin-top:6px; }
+  details.how .hb b{ font-weight:600; }
 </style>
 </head>
 <body>
@@ -332,9 +343,12 @@ function setp(o,p,v){const k=p.split('.');const l=k.pop();let a=o;k.forEach(x=>{
 function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>t.hidden=true,2600);}
 function newRec(){
   return {id:uid(),created:Date.now(),updated:Date.now(),step:0,
-    anag:{},viso:{occhi:[],labbra:[],pelle:[]},colori:{},asp:{stili:[],resa:[]},
+    anag:{dataProva:todayIso()},viso:{occhi:[],labbra:[],pelle:[]},colori:{},asp:{stili:[],resa:[]},
     prova:{steps:PROVA_DEFAULT.map(n=>({id:uid(),nome:n,note:''})),note:'',giorno:''},photos:[]};
 }
+function todayIso(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function fmtIso(i){return i?new Date(i+'T12:00:00').toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric'}):'';}
+function provaDay(r){return fmtIso(r.anag.dataProva)||fmtDate(r.created);}
 function fullName(r){return ((r.anag.nome||'')+' '+(r.anag.cognome||'')).trim()||'Cliente senza nome';}
 function fmtDate(t){return new Date(t).toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric'});}
 
@@ -357,7 +371,7 @@ async function dbPut(r){const db=await openDb(); if(!db){mem.set(r.id,r);return;
 async function dbDel(id){const db=await openDb(); if(!db){mem.delete(id);return;} return req(db,'readwrite',s=>s.delete(id));}
 
 /* ====================== STATO ====================== */
-const S={rec:null,step:0,list:[],q:'',pdf:null};
+const S={rec:null,step:0,list:[],q:'',pdf:null,open:{}};
 let saveT=null;
 function touch(){ if(!S.rec) return; S.rec.updated=Date.now(); S.rec.step=Math.max(S.rec.step||0,S.step); clearTimeout(saveT); saveT=setTimeout(saveNow,350); }
 async function saveNow(){ clearTimeout(saveT); if(S.rec){ try{await dbPut(S.rec);}catch(e){toast('Salvataggio non riuscito (spazio esaurito?)');} } }
@@ -397,7 +411,7 @@ function viewHome(){
   <button class="btn" data-act="new">+ Nuova consulenza</button>
   ${S.list.length>4?`<label class="f">Cerca</label><input type="text" id="search" placeholder="Nome o cognome" value="${esc(S.q)}">`:''}
   <h2 style="margin-top:34px">Schede salvate</h2>
-  ${l.length?l.map(r=>`<div class="client" data-open="${r.id}"><div class="grow"><div class="nm">${esc(fullName(r))}</div><div class="meta">${esc(r.anag.occasione||'Consulenza')} · ${fmtDate(r.updated)}${r.photos&&r.photos.length?' · '+r.photos.length+' foto':''}</div></div><button class="x" data-del="${r.id}" aria-label="Elimina">×</button></div>`).join(''):`<div class="empty">Nessuna scheda ancora.</div>`}
+  ${l.length?l.map(r=>`<div class="client" data-open="${r.id}"><div class="grow"><div class="nm">${esc(fullName(r))}</div><div class="meta">${esc(r.anag.occasione||'Consulenza')} · prova ${esc(provaDay(r))}${r.photos&&r.photos.length?' · '+r.photos.length+' foto':''}</div></div><button class="x" data-del="${r.id}" aria-label="Elimina">×</button></div>`).join(''):`<div class="empty">Nessuna scheda ancora.</div>`}
   <h2>Backup</h2>
   <p class="hint">Esporta tutte le schede in un file (foto incluse) per non perderle se cambi telefono o cancelli i dati del browser.</p>
   <div class="stack"><button class="btn ghost" data-act="export">Esporta backup</button>
@@ -409,8 +423,14 @@ function viewAnag(){
   return `<h1>Chi è la cliente</h1><p class="lead">Dati di contatto e occasione del trucco.</p>
   ${field('Nome','anag.nome','text')}${field('Cognome','anag.cognome','text')}
   ${field('Email','anag.email','email')}${field('Telefono','anag.tel','tel')}
-  <label class="f">Occasione</label>${chips('anag.occasione',['Sposa','Cerimonia','Serata / evento','Servizio foto','Quotidiano','Altro'])}
-  ${sposa?field('Data delle nozze','anag.dataEvento','date')+field('Luogo / orario','anag.luogo','text','es. Villa, cerimonia ore 15'):''}
+  ${field('Giorno della prova trucco','anag.dataProva','date')}
+  <label class="f">Tipo di evento</label>${chips('anag.occasione',['Sposa','Cerimonia','Serata / evento','Servizio foto','Quotidiano','Altro'])}
+  ${field(sposa?'Data delle nozze':'Data del trucco','anag.dataEvento','date')}
+  ${field('Luogo del trucco','anag.luogo','text','Dove avverrà il trucco (indirizzo / struttura)')}
+  <label class="f">Fascia oraria del trucco</label>
+  <div class="row"><div class="grow"><p class="hint" style="margin:0 0 6px">Inizio previsto</p><input type="time" data-bind="anag.oraInizio" value="${esc(S.rec.anag.oraInizio||'')}"></div>
+  <div class="grow"><p class="hint" style="margin:0 0 6px">Fine massima</p><input type="time" data-bind="anag.oraFine" value="${esc(S.rec.anag.oraFine||'')}"></div></div>
+  <p class="hint" style="margin-top:8px">${sposa?'Il trucco si fa di solito il giorno delle nozze: l\'orario massimo di fine è il vincolo da rispettare.':'Indica entro che ora il trucco deve essere concluso.'}</p>
   ${area('Note','anag.note','Altre informazioni utili')}`;
 }
 
@@ -426,19 +446,58 @@ function viewViso(){
 }
 
 function palette(arr){return `<div class="pal">${arr.map(([n,c])=>`<div class="sw"><i style="background:${c}"></i>${esc(n)}</div>`).join('')}</div>`;}
+const HOW={
+ prep:['Prima di cominciare: come preparare l\'analisi',`<ul>
+  <li><b>Luce naturale</b>, vicino a una finestra, mai luce calda o led colorato.</li>
+  <li><b>Viso struccato</b> (o con trucco minimo), capelli raccolti e via dal viso, niente gioielli né occhiali colorati.</li>
+  <li>Una <b>mantella o telo bianco</b> sulle spalle, per non farsi influenzare dai vestiti.</li>
+  <li>Valutare sempre i <b>colori naturali</b>: capelli tinti o abbronzatura recente falsano il risultato. Guardare radici e sopracciglia.</li>
+  <li><b>Ordine</b>: prima sottotono, poi intensità, poi profondità. Ogni risposta si conferma con una prova colori vicino al viso.</li></ul>`],
+ sotto:['Come riconoscere il sottotono',`<p>Il sottotono non è il colore della pelle: una pelle chiarissima può essere calda, una scura può essere fredda.</p><ul>
+  <li><b>Vene del polso</b> (luce naturale): verdi o olivastre = <b>caldo</b>; blu o viola = <b>freddo</b>; miste o indecise = <b>neutro</b>.</li>
+  <li><b>Oro o argento</b> accanto al viso: l'oro illumina = caldo; l'argento illumina = freddo; entrambi vanno bene = neutro.</li>
+  <li><b>Telo sotto il mento</b>: bianco puro (ottico) che fa bene = freddo; avorio o panna che fa bene = caldo.</li>
+  <li><b>Pesca/corallo oppure rosa/fucsia</b> vicino al viso: il primo valorizza = caldo; il secondo = freddo.</li>
+  <li><b>Indizi sul viso</b>: lentiggini color miele o ramate, riflessi dorati nei capelli = caldo. Rossori rosati o bluastri, ombre grigio-blu sotto gli occhi = freddo.</li>
+  <li><b>Sole</b> (indicativo): si abbronza dorata = caldo; si arrossa e abbronza poco = freddo.</li>
+  <li><b>Neutro</b>: nessun segnale prevale. Scegliere "neutro caldo" o "neutro freddo" in base a quale colore del telo dona di più.</li></ul>
+  <p><b>Attenzione:</b> rossori, couperose e abbronzatura ingannano. Il test più affidabile è il telo, confrontando due colori uno dopo l'altro.</p>`],
+ croma:['Come riconoscere l\'intensità',`<p>Si valuta il <b>contrasto</b> tra pelle, capelli e occhi, e la <b>limpidezza</b> dei colori.</p><ul>
+  <li><b>Brillante</b>: contrasto netto (es. capelli scuri, pelle chiara, occhi vividi). Il bianco dell'occhio è limpido, l'iride ha un colore pulito e acceso. I colori puri e saturi (rosso, turchese, fucsia) stanno bene.</li>
+  <li><b>Morbido</b>: poco contrasto, tutto sulla stessa tonalità, sfumato. Occhi con colori misti e "polverosi" (nocciola, verde-grigio, castano). I colori attenuati (salvia, malva, cammello) stanno meglio.</li>
+  <li><b>Test del colore vivo</b>: avvicinare al viso un rosso o un fucsia puro. Se il colore "vince" sul viso e la persona sembra sparire = <b>morbido</b>. Se il viso si accende = <b>brillante</b>.</li></ul>`],
+ prof:['Come riconoscere la profondità',`<p>Si guarda l'<b>insieme</b> di capelli naturali, occhi e pelle, non la sola pelle.</p><ul>
+  <li><b>Chiaro</b>: capelli biondi o castano chiaro, occhi chiari, pelle chiara. I colori scuri e pesanti "schiacciano" il viso.</li>
+  <li><b>Scuro</b>: capelli castano scuro o neri, occhi scuri, pelle da media a scura. I colori troppo pallidi la "spengono".</li>
+  <li><b>Medio</b>: via di mezzo, nessuno dei due estremi prevale.</li>
+  <li><b>Trucco utile</b>: una foto in bianco e nero del viso mostra subito se l'insieme è chiaro, medio o scuro.</li></ul>`],
+ sub:['Come scegliere la sottostagione',`<p>Ogni stagione ha tre sottostagioni. Si sceglie quella legata al <b>tratto dominante</b>, cioè la prima cosa che si nota della persona:</p><ul>
+  <li><b>Chiara</b>: domina la luminosità e la delicatezza.</li>
+  <li><b>Calda / Fredda</b> ("pura"): domina in modo netto la temperatura.</li>
+  <li><b>Profonda</b>: domina la scurezza dell'insieme.</li>
+  <li><b>Morbida</b>: domina l'assenza di contrasto, tutto sfumato.</li>
+  <li><b>Brillante</b>: dominano contrasto e vivacità.</li></ul>
+  <p><b>Verifica sul viso</b>: provare due o tre rossetti o blush della palette. Quello giusto uniforma la pelle, attenua ombre e occhiaie e rende gli occhi luminosi. Quello sbagliato ingiallisce o ingrigisce, evidenzia rossori e occhiaie, e il colore si vede più del viso.</p>
+  <p><b>Se sei indecisa</b>: provare la sottostagione vicina della stessa stagione e tenere quella che regge meglio il test.</p>`]
+};
+function how(id){
+  const [t,b]=HOW[id];
+  return `<details class="how" data-how="${id}"${S.open[id]?' open':''}><summary>${t}</summary><div class="hb">${b}</div></details>`;
+}
 function viewColori(){
   const c=S.rec.colori; const season=seasonOf(c);
   let h=`<h1>Armocromia</h1><p class="lead">Osservate la pelle a luce naturale, senza trucco.</p>
-  <label class="f">Sottotono della pelle</label><p class="hint">Vene del polso verdi = caldo, blu/viola = freddo. L'oro dona = caldo, l'argento = freddo.</p>
-  ${chips('colori.sottotono',['Caldo','Neutro caldo','Neutro freddo','Freddo'])}
-  <label class="f">Intensità / contrasto</label><p class="hint">Morbido: colori sfumati, poco contrasto. Brillante: contrasto netto tra pelle, occhi e capelli.</p>
-  ${chips('colori.croma',['Morbido','Brillante'])}
-  <label class="f">Profondità generale</label>${chips('colori.profondita',['Chiaro','Medio','Scuro'])}
-  ${field('Colore dei capelli','colori.capelli','text')}${field('Colore degli occhi','colori.occhiCol','text')}`;
+  ${how('prep')}
+  <label class="f">Sottotono della pelle</label>
+  ${chips('colori.sottotono',['Caldo','Neutro caldo','Neutro freddo','Freddo'])}<div style="height:10px"></div>${how('sotto')}
+  <label class="f">Intensità / contrasto</label>
+  ${chips('colori.croma',['Morbido','Brillante'])}<div style="height:10px"></div>${how('croma')}
+  <label class="f">Profondità generale</label>${chips('colori.profondita',['Chiaro','Medio','Scuro'])}<div style="height:10px"></div>${how('prof')}
+  ${field('Colore naturale dei capelli','colori.capelli','text')}${field('Colore degli occhi','colori.occhiCol','text')}`;
   if(season){
     const sug=c.profondita?SUGG[season][c.profondita.toLowerCase()]:null;
     h+=`<div class="season"><span class="eyebrow">Stagione suggerita</span><b>${season}</b>${esc(SEASON_D[season])}</div>
-    <label class="f">Sottostagione</label><p class="hint">Scegliete quella che calza meglio: è una valutazione di Giorgia.</p>
+    <label class="f">Sottostagione</label><p class="hint">La proposta si basa sulla profondità. La scelta finale è di Giorgia.</p>${how('sub')}
     <div class="subs">${SUBS[season].map(([id,n],i)=>`<button type="button" class="sub${c.sub===id?' on':''}" data-chip="colori.sub" data-val="${id}"><b>${n}${sug===i?'<span class="tag">consigliata</span>':''}</b><span>${esc(SD[id].d)}</span></button>`).join('')}</div>`;
   }
   if(c.sub&&SD[c.sub]&&seasonOfSub(c.sub)===season){
@@ -455,7 +514,6 @@ function viewAsp(){
   <label class="f">Intensità occhi</label>${chips('asp.occhi',['Delicata','Media','Intensa'])}
   <label class="f">Labbra</label>${chips('asp.labbra',['Nude','Rosa','Corallo','Rosso','Scure / bordeaux','Lucide'])}
   <label class="f">Resistenza</label>${chips('asp.resa',['Resistente alle lacrime','Lunga durata','Ritocchi in giornata'],1)}
-  ${field('Durata richiesta','asp.durata','text','es. dalle 10 alle 22')}
   ${area('Riferimenti / ispirazioni','asp.rif','Descrivi il look o incolla un link')}
   ${area('Da evitare','asp.evitare','')}
   ${field('Allergie / intolleranze','asp.allergie','text')}`;
@@ -480,22 +538,24 @@ function viewProva(){
   ${area('Note della prova','prova.note','Cosa è piaciuto, cosa cambiare')}
   ${area('Da modificare per il giorno','prova.giorno','')}
   <h2>Foto della prova</h2>
-  <div class="stack"><label class="btn sage" style="cursor:pointer">Aggiungi foto<input type="file" id="ph" accept="image/*" multiple></label></div>
+  <div class="stack"><label class="btn sage" style="cursor:pointer">Scatta una foto<input type="file" class="phin" accept="image/*" capture="environment"></label>
+  <label class="btn ghost" style="cursor:pointer">Scegli dalla galleria<input type="file" class="phin" accept="image/*" multiple></label></div>
   <div class="photos">${S.rec.photos.map(f=>`<div class="ph"><img src="${f.data}" alt=""><select data-plabel="${f.id}">${['Prova','Prima','Dopo','Riferimento'].map(l=>`<option${f.label===l?' selected':''}>${l}</option>`).join('')}</select><button class="del" data-pdel="${f.id}">Elimina</button></div>`).join('')}</div>`;
 }
 
+function orario(a){ const p=[]; if(a.oraInizio) p.push('inizio dalle '+a.oraInizio); if(a.oraFine) p.push('fine entro le '+a.oraFine); return p.join(' - '); }
 function listVal(v){return Array.isArray(v)?v.join(', '):(v||'');}
 function dl(pairs){return `<dl>${pairs.filter(p=>listVal(p[1])).map(([k,v])=>`<dt>${k}</dt><dd>${esc(listVal(v))}</dd>`).join('')}</dl>`;}
 function viewRiep(){
   const r=S.rec,a=r.anag,v=r.viso,c=r.colori,s=r.asp,p=r.prova,d=c.sub&&SD[c.sub];
   const steps=p.steps.filter(x=>x.note.trim());
-  return `<h1>${esc(fullName(r))}</h1><p class="lead">${esc(a.occasione||'Consulenza trucco')} · ${fmtDate(r.updated)}</p>
+  return `<h1>${esc(fullName(r))}</h1><p class="lead" style="margin-bottom:6px"><b>Giorno della prova trucco:</b> ${esc(provaDay(r))}</p>
   <div class="sum">
-  <h3>Anagrafica</h3>${dl([['Email',a.email],['Telefono',a.tel],['Data nozze',a.dataEvento],['Luogo',a.luogo],['Note',a.note]])}
+  <h3>Anagrafica</h3>${dl([['Tipo evento',a.occasione],['Email',a.email],['Telefono',a.tel],[a.occasione==='Sposa'?'Data nozze':'Data',a.dataEvento],['Luogo del trucco',a.luogo],['Orario',orario(a)],['Note',a.note]])}
   <h3>Viso</h3>${dl([['Forma',v.forma&&FACES[v.forma].n],['Pelle',v.pelle],['Occhi',v.occhi],['Labbra',v.labbra],['Note',v.note]])}
   <h3>Armocromia</h3>${dl([['Sottotono',c.sottotono],['Intensità',c.croma],['Profondità',c.profondita],['Capelli',c.capelli],['Occhi',c.occhiCol],['Stagione',c.sub&&subName(c.sub)],['Note',c.note]])}
   ${d?palette([...d.occhi,...d.labbra,...d.blush]):''}
-  <h3>Aspettative</h3>${dl([['Stile',s.stili],['Finish',s.finish],['Occhi',s.occhi],['Labbra',s.labbra],['Resistenza',s.resa],['Durata',s.durata],['Riferimenti',s.rif],['Da evitare',s.evitare],['Allergie',s.allergie]])}
+  <h3>Aspettative</h3>${dl([['Stile',s.stili],['Finish',s.finish],['Occhi',s.occhi],['Labbra',s.labbra],['Resistenza',s.resa],['Riferimenti',s.rif],['Da evitare',s.evitare],['Allergie',s.allergie]])}
   <h3>Prova trucco</h3>${steps.length?`<dl>${steps.map(x=>`<dt>${esc(x.nome)}</dt><dd>${esc(x.note)}</dd>`).join('')}</dl>`:''}${dl([['Note',p.note],['Per il giorno',p.giorno]])}
   ${r.photos.length?`<div class="photos">${r.photos.map(f=>`<div class="ph"><img src="${f.data}" alt=""><div class="muted" style="margin-top:6px">${esc(f.label)}</div></div>`).join('')}</div>`:''}
   </div>
@@ -541,6 +601,7 @@ document.addEventListener('click',async e=>{
     case 'share': sharePdf(); break;
   }
 });
+document.addEventListener('toggle',e=>{ const d=e.target; if(d.dataset&&d.dataset.how) S.open[d.dataset.how]=d.open; },true);
 document.addEventListener('input',e=>{
   const t=e.target;
   if(t.dataset.bind){ setp(S.rec,t.dataset.bind,t.value); touch(); }
@@ -550,7 +611,7 @@ document.addEventListener('input',e=>{
 document.addEventListener('change',async e=>{
   const t=e.target;
   if(t.dataset.plabel){ const f=S.rec.photos.find(x=>x.id===t.dataset.plabel); if(f){f.label=t.value; touch();} }
-  else if(t.id==='ph'){ const files=[...t.files]; t.value=''; for(const f of files){ try{ S.rec.photos.push({id:uid(),label:'Prova',data:await shrink(f)}); }catch(_){ toast('Foto non leggibile'); } } touch(); await saveNow(); render(true); }
+  else if(t.classList.contains('phin')){ const files=[...t.files]; t.value=''; if(!files.length) return; let ok=0; for(const f of files){ try{ S.rec.photos.push({id:uid(),label:'Prova',data:await shrink(f)}); ok++; }catch(_){ toast('Foto non leggibile (formato non supportato?)'); } } if(ok){ touch(); await saveNow(); render(true); toast(ok+(ok>1?' foto aggiunte':' foto aggiunta')); } }
   else if(t.id==='imp'){ importAll(t.files[0]); t.value=''; }
 });
 
@@ -567,6 +628,7 @@ function shrink(file,max=1600,q=.82){
 
 /* ---------- backup ---------- */
 async function shareOrSave(blob,name,title){
+  try{ const dl=window.claude&&window.claude.use&&await window.claude.use('downloads'); if(dl){ await dl.save({filename:name,data:blob}); return; } }catch(e){ if(e&&e.code==='declined') return; }
   const file=new File([blob],name,{type:blob.type});
   if(navigator.canShare&&navigator.canShare({files:[file]})){ try{ await navigator.share({files:[file],title}); return; }catch(e){ if(e&&e.name==='AbortError') return; } }
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);
@@ -605,7 +667,7 @@ async function buildPdf(r){
   y+=17; doc.setDrawColor(...GOLD); doc.setLineWidth(.4); doc.line(M,y,W-M,y); y+=12;
   doc.setTextColor(...CH); doc.setFont('times','normal'); doc.setFontSize(26); doc.text(lat(fullName(r)),M,y); y+=8;
   doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(...TAUPE);
-  doc.text(lat([a.occasione,fmtDate(r.updated)].filter(Boolean).join('  ·  ')),M,y); y+=10;
+  doc.text(lat('Giorno della prova trucco: '+provaDay(r)),M,y); y+=10;
 
   const section=t=>{ ensure(22); y+=6; doc.setFont('times','normal'); doc.setFontSize(16); doc.setTextColor(...CH); doc.text(lat(t),M,y); y+=2.5; doc.setDrawColor(...GOLD); doc.setLineWidth(.35); doc.line(M,y,M+14,y); y+=6; };
   const kv=(k,val)=>{ val=listVal(val); if(!String(val).trim()) return;
@@ -619,7 +681,7 @@ async function buildPdf(r){
     y+=14; };
 
   section('Anagrafica');
-  kv('Email',a.email); kv('Telefono',a.tel); if(a.occasione==='Sposa'){kv('Data nozze',a.dataEvento);kv('Luogo / orario',a.luogo);} kv('Note',a.note);
+  kv('Tipo evento',a.occasione); kv('Email',a.email); kv('Telefono',a.tel); kv(a.occasione==='Sposa'?'Data nozze':'Data',a.dataEvento); kv('Luogo del trucco',a.luogo); kv('Orario',orario(a)); kv('Note',a.note);
 
   section('Viso');
   kv('Forma del viso',v.forma&&FACES[v.forma].n); kv('Tipo di pelle',v.pelle); kv('Forma degli occhi',v.occhi); kv('Labbra',v.labbra); kv('Note',v.note);
@@ -630,7 +692,7 @@ async function buildPdf(r){
   if(d){ sw('Occhi',d.occhi); sw('Labbra',d.labbra); sw('Blush',d.blush); kv('Metalli',d.m); }
 
   section('Aspettative');
-  kv('Stile',s.stili); kv('Finish',s.finish); kv('Intensita occhi',s.occhi); kv('Labbra',s.labbra); kv('Resistenza',s.resa); kv('Durata',s.durata); kv('Riferimenti',s.rif); kv('Da evitare',s.evitare); kv('Allergie',s.allergie);
+  kv('Stile',s.stili); kv('Finish',s.finish); kv('Intensita occhi',s.occhi); kv('Labbra',s.labbra); kv('Resistenza',s.resa); kv('Riferimenti',s.rif); kv('Da evitare',s.evitare); kv('Allergie',s.allergie);
 
   if(v.forma){
     const f=FACES[v.forma]; section('Linee guida - viso '+f.n.toLowerCase());
