@@ -412,7 +412,7 @@ function renderNav(){
 function viewHome(){
   const q=S.q.trim().toLowerCase();
   const l=S.list.filter(r=>!q||fullName(r).toLowerCase().includes(q)).sort((a,b)=>b.updated-a.updated);
-  return `<h1>Consulenza e prova trucco</h1>
+  return `<span class="eyebrow">Primo incontro</span><h1>Consulenza e prova trucco</h1>
   <p class="lead">Scheda cliente, forma del viso, armocromia e prova trucco. I dati restano solo su questo dispositivo.</p>
   <button class="btn" data-act="new">+ Nuova consulenza</button>
   ${S.list.length>4?`<label class="f">Cerca</label><input type="text" id="search" placeholder="Nome o cognome" value="${esc(S.q)}">`:''}
