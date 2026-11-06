@@ -208,6 +208,15 @@
   .phase .ph-h b{ font-family:'Cormorant Garamond',serif; font-size:24px; font-weight:700; line-height:1.1; }
   .phase .f2{ display:block; font-size:11px; letter-spacing:.14em; text-transform:uppercase; font-weight:700; color:#7a7a7a; margin:16px 0 8px; }
   .phase .note{ font-size:13px; color:#7a7a7a; margin-top:10px; }
+  .dayhead.red{ color:#B5483F; }
+  .panel .ag.alert, .ag.alert{ flex-wrap:wrap; background:#FCF1EF; border:1px solid #E2B6AF; border-radius:2px; padding:14px; margin:0 0 10px; box-shadow:inset 4px 0 0 #B5483F; }
+  .alertbar{ flex:0 0 100%; }
+  .alertmsg{ font-size:13px; font-weight:600; color:#9a3b32; margin-top:2px; }
+  .qa{ display:flex; gap:8px; margin-top:10px; }
+  .qa .btn.sm{ flex:1; padding:10px 8px; }
+  .alert-n{ display:inline-block; min-width:20px; height:20px; line-height:20px; border-radius:10px; background:#B5483F; color:#fff; font-size:11px; font-weight:700; text-align:center; margin-left:6px; padding:0 5px; }
+  .later{ display:flex; justify-content:space-between; align-items:center; gap:10px; width:100%; background:transparent; border:1px dashed var(--taupe); border-radius:2px; padding:14px; min-height:50px; margin:20px 0 6px; font:600 14px 'Manrope',sans-serif; color:var(--charcoal); cursor:pointer; text-align:left; }
+  .later span{ font-size:20px; font-weight:400; }
   .ov{ position:fixed; inset:0; background:rgba(43,43,43,.42); z-index:60; }
   .sheet{ position:fixed; left:0; right:0; bottom:0; z-index:61; max-width:560px; margin:0 auto; background:var(--warm-white); border-radius:12px 12px 0 0; padding:24px var(--safe-x) var(--safe-bottom); max-height:90vh; max-height:90dvh; overflow-y:auto; box-shadow:0 -10px 40px rgba(0,0,0,.18); }
   .sheet h3{ font-size:26px; margin-bottom:4px; }
@@ -431,7 +440,7 @@ async function dbPut(r){const db=await openDb(); if(!db){mem.set(r.id,r);return;
 async function dbDel(id){const db=await openDb(); if(!db){mem.delete(id);return;} return req(db,'readwrite',s=>s.delete(id));}
 
 /* ====================== STATO ====================== */
-const S={rec:null,step:0,list:[],q:'',pdf:null,open:{},filtro:'da-fare',periodo:'',sheet:null,nuovo:null};
+const S={rec:null,step:0,list:[],q:'',pdf:null,open:{},filtro:'calendario',periodo:'',piu:false,sheet:null,nuovo:null};
 let saveT=null;
 function touch(){ if(!S.rec) return; S.rec.updated=Date.now(); S.rec.step=Math.max(S.rec.step||0,S.step); clearTimeout(saveT); saveT=setTimeout(saveNow,350); }
 async function saveNow(){ clearTimeout(saveT); if(S.rec){ try{await dbPut(S.rec);}catch(e){toast('Salvataggio non riuscito (spazio esaurito?)');} } }
@@ -461,7 +470,7 @@ function renderNav(){
   n.hidden=false;
   const last=S.step===STEPS.length-1;
   i.innerHTML=(S.step>0?`<button class="btn ghost" data-act="prev">Indietro</button>`:`<button class="btn ghost" data-act="home">Schede</button>`)+
-    (last?`<button class="btn" data-act="close">Chiudi scheda</button>`:`<button class="btn" data-act="next">Avanti</button>`);
+    (last?`<button class="btn" data-act="close">Salva e aggiorna agenda</button>`:`<button class="btn" data-act="next">Avanti</button>`);
 }
 
 const STATI=[
@@ -487,36 +496,59 @@ function dayHead(iso,month){
   if(!month){ if(d<0) return 'Passati'; if(d===0) return 'Oggi'; if(d===1) return 'Domani'; if(d<=7) return 'Questa settimana'; }
   const m=new Date(iso+'T12:00:00').toLocaleDateString('it-IT',{month:'long',year:'numeric'}); return m.charAt(0).toUpperCase()+m.slice(1);
 }
-function agendaDate(r){ return (stId(r)==='confermato'||stId(r)==='concluso')?(r.anag.dataEvento||r.anag.dataProva||''):(r.anag.dataProva||''); }
-function agendaKey(r){ return (agendaDate(r)||'9999-99-99')+(stId(r)==='da-fare'?(r.anag.oraProva||'99:99'):''); }
+function agendaDate(r){ const st=stId(r); return st==='confermato'?(r.anag.dataEvento||''):st==='concluso'?(r.anag.dataEvento||r.anag.dataProva||''):(r.anag.dataProva||''); }
+function agendaKey(r){ const st=stId(r); return (agendaDate(r)||'9999-99-99')+(st==='da-fare'?(r.anag.oraProva||'99:99'):st==='confermato'?(r.anag.oraInizio||'99:99'):''); }
+function attention(r){
+  const st=stId(r), d=agendaDate(r), t=todayIso();
+  if(st==='da-fare'&&d&&d<t) return {kind:'prova',msg:'La prova del '+fmtIso(d)+' è passata: com\'è andata?'};
+  if(st==='confermato'&&!d) return {kind:'nodata',msg:'Manca la data del trucco definitivo.'};
+  if(st==='confermato'&&d<t) return {kind:'def',msg:'Il trucco del '+fmtIso(d)+' è passato: com\'è andato?'};
+  return null;
+}
+function agRow(r,lab){
+  const st=stId(r), iso=agendaDate(r), at=attention(r);
+  const dd=iso?new Date(iso+'T12:00:00'):null;
+  const tm=st==='da-fare'?r.anag.oraProva:st==='confermato'?r.anag.oraInizio:'';
+  const l=lab?(st==='da-fare'?'prova':st==='confermato'?'trucco':''):'';
+  const when=iso?`<b>${dd.getDate()}</b><span>${dd.toLocaleDateString('it-IT',{month:'short'}).replace('.','')}</span><i>${[l,tm?esc(tm):''].filter(Boolean).join(' · ')}</i>`:`<b>–</b><span>senza data</span>`;
+  const qa=at?`<div class="alertbar"><div class="alertmsg">${esc(at.msg)}</div><div class="qa">${at.kind!=='nodata'?`<button class="btn sm" data-qa="fatta" data-id="${r.id}">${at.kind==='def'?'Fatto':'Fatta'}</button>`:''}<button class="btn sm ghost" data-qa="sposta" data-id="${r.id}">${at.kind==='nodata'?'Imposta data':'Sposta'}</button><button class="btn sm ghost" data-qa="altro" data-id="${r.id}">Altro…</button></div></div>`:'';
+  return `<div class="ag${at?' alert':''}" data-open="${r.id}"><div class="agd">${when}</div><div class="grow"><div class="nm">${esc(fullName(r))}</div><div class="meta">${esc(r.anag.occasione||'Consulenza')}${r.anag.tel?' · '+esc(r.anag.tel):''}</div>${tagsHtml(r)}</div>${stChip(r)}${qa}</div>`;
+}
 function agendaHtml(){
-  const f=S.filtro; const cnt=id=>S.list.filter(r=>stId(r)===id).length;
+  const f=S.filtro, today=todayIso();
+  const cal=S.list.filter(r=>['da-fare','confermato'].includes(stId(r)));
+  const nAlert=S.list.filter(r=>attention(r)).length;
+  const cnt=id=>S.list.filter(r=>stId(r)===id).length;
   const nInc=S.list.filter(r=>payTags(r).length).length;
-  const opts=[...STATI.filter(x=>x.id!=='annullato').map(x=>({id:x.id,s:x.s,c:x.c,n:cnt(x.id)})),{id:'incasso',s:'Da incassare',c:'#B8923E',n:nInc},{id:'annullato',s:'Annullato',c:STATI[4].c,n:cnt('annullato')},{id:'tutti',s:'Tutti',c:null,n:S.list.length}];
-  const chipsH=`<div class="fchips">${opts.map(o=>`<button type="button" class="chip${f===o.id?' on':''}" data-filtro="${o.id}">${o.c?`<i class="sd" style="background:${o.c}"></i>`:''}${o.s}<span class="cnt">${o.n}</span></button>`).join('')}</div>`;
+  const opts=[{id:'calendario',s:'Calendario',c:'#C9B37E',n:cal.length,a:nAlert},{id:'attesa',s:'Da confermare',c:STATI[1].c,n:cnt('attesa')},{id:'concluso',s:'Eseguito',c:STATI[3].c,n:cnt('concluso')},{id:'incasso',s:'Da incassare',c:'#B8923E',n:nInc},{id:'annullato',s:'Annullato',c:STATI[4].c,n:cnt('annullato')},{id:'tutti',s:'Tutti',c:null,n:S.list.length}];
+  const chipsH=`<div class="fchips">${opts.map(o=>`<button type="button" class="chip${f===o.id?' on':''}" data-filtro="${o.id}">${o.c?`<i class="sd" style="background:${o.c}"></i>`:''}${o.s}<span class="cnt">${o.n}</span>${o.a?`<span class="alert-n">${o.a}</span>`:''}</button>`).join('')}</div>`;
   const months=[...new Set(S.list.map(r=>agendaDate(r).slice(0,7)).filter(Boolean))].sort();
   if(S.periodo&&!months.includes(S.periodo)) S.periodo='';
-  const mlab=m=>dayHead(m+'-15',true);
-  const per=months.length?`<select id="periodo" aria-label="Periodo" style="margin:4px 0 2px"><option value="">Periodo: tutti</option>${months.map(m=>`<option value="${m}"${S.periodo===m?' selected':''}>${mlab(m)}</option>`).join('')}</select>`:'';
-  let items=S.list.filter(r=>f==='tutti'||(f==='incasso'?payTags(r).length>0:stId(r)===f));
-  if(S.periodo) items=items.filter(r=>agendaDate(r).slice(0,7)===S.periodo);
-  const today=todayIso(), key=agendaKey;
-  const desc=(f==='concluso'||f==='annullato');
-  if(f==='tutti'&&!S.periodo){
-    const up=items.filter(r=>!agendaDate(r)||agendaDate(r)>=today).sort((a,b)=>key(a).localeCompare(key(b)));
-    const pa=items.filter(r=>agendaDate(r)&&agendaDate(r)<today).sort((a,b)=>key(b).localeCompare(key(a)));
-    items=up.concat(pa);
-  } else items.sort((a,b)=>desc?key(b).localeCompare(key(a)):key(a).localeCompare(key(b)));
-  const monthMode=desc||!!S.periodo;
-  let last='',body='';
-  items.forEach(r=>{
-    const iso=agendaDate(r), h=dayHead(iso,monthMode); if(h!==last){ body+=`<div class="dayhead">${h}</div>`; last=h; }
-    const dd=iso?new Date(iso+'T12:00:00'):null;
-    const ev=(stId(r)==='confermato'||stId(r)==='concluso')&&r.anag.dataEvento, lab=ev?'evento':'';
-    const when=iso?`<b>${dd.getDate()}</b><span>${dd.toLocaleDateString('it-IT',{month:'short'}).replace('.','')}</span><i>${[lab,stId(r)==='da-fare'&&r.anag.oraProva?esc(r.anag.oraProva):''].filter(Boolean).join(' · ')}</i>`:`<b>–</b><span>senza data</span>`;
-    body+=`<div class="ag" data-open="${r.id}"><div class="agd">${when}</div><div class="grow"><div class="nm">${esc(fullName(r))}</div><div class="meta">${esc(r.anag.occasione||'Consulenza')}${r.anag.tel?' · '+esc(r.anag.tel):''}</div>${tagsHtml(r)}</div>${stChip(r)}</div>`;
-  });
-  if(!items.length) body=`<div class="empty" style="padding:26px 10px">${f==='da-fare'?'Nessuna prova da fare.':f==='incasso'?'Nessun incasso in sospeso.':f==='tutti'?'Nessuna scheda.':'Nessuna scheda in questo stato.'}</div>`;
+  const per=months.length?`<select id="periodo" aria-label="Periodo" style="margin:4px 0 2px"><option value="">Periodo: tutti</option>${months.map(m=>`<option value="${m}"${S.periodo===m?' selected':''}>${dayHead(m+'-15',true)}</option>`).join('')}</select>`:'';
+  let items=S.list.filter(r=>f==='calendario'?['da-fare','confermato'].includes(stId(r)):f==='tutti'||(f==='incasso'?payTags(r).length>0:stId(r)===f));
+  if(S.periodo) items=items.filter(r=>agendaDate(r).slice(0,7)===S.periodo||(f==='calendario'&&attention(r)&&!agendaDate(r)));
+  const key=agendaKey, asc=(a,b)=>key(a).localeCompare(key(b)), desc=(a,b)=>key(b).localeCompare(key(a));
+  const group=(arr,month,lab)=>{ let last='',h=''; arr.forEach(r=>{ const hd=dayHead(agendaDate(r),month); if(hd!==last){ h+=`<div class="dayhead">${hd}</div>`; last=hd; } h+=agRow(r,lab); }); return h; };
+  let body='';
+  if(f==='calendario'){
+    items.sort(asc);
+    const over=items.filter(attention), ok=items.filter(r=>!attention(r));
+    if(over.length) body+=`<div class="dayhead red">Da aggiornare · ${over.length}</div>`+over.map(r=>agRow(r,true)).join('');
+    let near=ok, later=[];
+    if(!S.periodo){ near=ok.filter(r=>!agendaDate(r)||daysFrom(agendaDate(r))<=30); later=ok.filter(r=>agendaDate(r)&&daysFrom(agendaDate(r))>30); }
+    body+=group(near,!!S.periodo,true);
+    if(later.length){ const lastD=agendaDate(later[later.length-1]);
+      body+=`<button class="later" data-act="piu"><span style="font-size:14px;font-weight:600">Più avanti · ${later.length} ${later.length===1?'scheda':'schede'} · fino a ${dayHead(lastD,true).toLowerCase()}</span><span>${S.piu?'−':'+'}</span></button>`+(S.piu?group(later,true,true):''); }
+    if(!body) body=`<div class="empty" style="padding:26px 10px">Niente in calendario.</div>`;
+  } else {
+    if(f==='tutti'&&!S.periodo){
+      const up=items.filter(r=>!agendaDate(r)||agendaDate(r)>=today).sort(asc), pa=items.filter(r=>agendaDate(r)&&agendaDate(r)<today).sort(desc);
+      items=up.concat(pa);
+    } else items.sort((f==='concluso'||f==='annullato')?desc:asc);
+    const monthMode=(f==='concluso'||f==='annullato')||!!S.periodo;
+    body=group(items,monthMode,f==='tutti');
+    if(!items.length) body=`<div class="empty" style="padding:26px 10px">${f==='attesa'?'Nessuna scheda da confermare.':f==='incasso'?'Nessun incasso in sospeso.':f==='tutti'?'Nessuna scheda.':'Nessuna scheda in questo stato.'}</div>`;
+  }
   return chipsH+per+body;
 }
 const norm=x=>String(x||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
@@ -697,15 +729,21 @@ function renderSheet(){
     </div>
     <div class="phase${d.provaFatta?'':' locked'}"><div class="ph-h"><span class="ph-n">2</span><b>Trucco definitivo</b></div>
       ${d.provaFatta?`<span class="f2">Conferma</span>${seg('confermato',[[0,'Da confermare'],[1,'Confermato']],d.confermato)}
-      ${d.confermato?`<span class="f2">Trucco</span>${seg('defFatto',[[0,'Da fare'],[1,'Fatto']],d.defFatto)}`:''}
+      ${d.confermato?`<span class="f2">Data del trucco definitivo</span><input type="date" data-dd value="${esc(d.dataEvento)}"><span class="f2">Trucco</span>${seg('defFatto',[[0,'Da fare'],[1,'Fatto']],d.defFatto)}`:''}
       ${d.defFatto?`<span class="f2">Pagamento</span>${seg('defInc',[[0,'Da incassare','warn'],[1,'Incassato','ok']],d.defInc)}`:''}`
       :`<p class="note">Si sblocca quando la prova trucco è fatta.</p>`}
     </div>
     <div class="chips" style="margin-top:18px"><button class="chip${d.annullata?' on':''}" data-seg="annullata" data-val="${d.annullata?0:1}">Scheda annullata / non confermata</button></div>
     <div class="stack" style="margin-top:24px">${dirty?'<button class="btn" data-act="savestato">Salva</button><button class="btn ghost" data-act="sheetclose">Annulla</button>':'<button class="btn ghost" data-act="sheetclose">Chiudi</button>'}</div>`;
+  } else if(sh.type==='sposta'){
+    const r=recById(sh.id), prova=sh.kind==='prova';
+    h=`<h3>${sh.kind==='nodata'?'Imposta la data':'Sposta'}</h3><p class="muted">${esc(fullName(r))} · ${prova?'prova trucco':'trucco definitivo'}</p>
+    <label class="f">${prova?'Nuovo giorno della prova':'Data del trucco definitivo'}</label><input type="date" data-sp="date" value="${esc(sh.date||'')}">
+    ${prova?`<label class="f">Ora</label><input type="time" data-sp="ora" value="${esc(sh.ora||'')}">`:''}
+    <div class="stack" style="margin-top:26px"><button class="btn" data-act="savesposta">Salva</button><button class="btn ghost" data-act="sheetclose">Annulla</button></div>`;
   } else if(sh.type==='chiudi'){
-    h=`<h3>La prova è stata eseguita?</h3><p class="lead" style="margin:6px 0 20px">La prova risulta <b>fatta</b> e la scheda passa a <b>Da confermare</b>.</p>
-    <div class="stack"><button class="btn" data-act="closepaid">Sì, fatta e incassata</button><button class="btn sage" data-act="closeunpaid">Sì, fatta, da incassare</button><button class="btn ghost" data-act="closeno">No, chiudi e basta</button></div>`;
+    h=`<h3>Aggiorno l'agenda?</h3><p class="lead" style="margin:6px 0 20px">La prova trucco è stata fatta? Se sì, la scheda passa a <b>Da confermare</b>.</p>
+    <div class="stack"><button class="btn" data-act="closepaid">Sì, fatta e incassata</button><button class="btn sage" data-act="closeunpaid">Sì, fatta, da incassare</button><button class="btn ghost" data-act="closeno">Non ancora, salva e basta</button></div>`;
   } else if(sh.type==='nuovo'){
     h=`<h3>Nuova scheda</h3><p class="muted">Bozza della scheda: il resto lo compili durante l'incontro.</p>
     ${nf('Nome','nome')}${nf('Cognome','cognome')}${nf('Cellulare','tel','tel')}${nf('Email','email','email')}
@@ -723,12 +761,13 @@ function draftFrom(r){
   const provaFatta=['attesa','confermato','concluso'].includes(st)||(an&&!!f.provaFatta);
   const confermato=['confermato','concluso'].includes(st)||(an&&!!f.confermato);
   const defFatto=st==='concluso'||(an&&!!f.defFatto);
-  return {provaFatta,provaInc:provaFatta&&!!p.prova,confermato,defFatto,defInc:defFatto&&!!p.saldo,annullata:an};
+  return {provaFatta,provaInc:provaFatta&&!!p.prova,confermato,defFatto,defInc:defFatto&&!!p.saldo,annullata:an,dataEvento:r.anag.dataEvento||''};
 }
 function applyDraft(r,d){
   r.fase={provaFatta:d.provaFatta,confermato:d.confermato,defFatto:d.defFatto};
   r.pag={prova:d.provaFatta&&d.provaInc,saldo:d.defFatto&&d.defInc};
   r.stato=d.annullata?'annullato':d.defFatto?'concluso':d.confermato?'confermato':d.provaFatta?'attesa':'da-fare';
+  if(d.confermato&&d.dataEvento) r.anag.dataEvento=d.dataEvento;
   r.updated=Date.now();
 }
 function segSet(key,v){
@@ -756,7 +795,12 @@ async function go(step){ await saveNow(); S.step=Math.max(0,Math.min(STEPS.lengt
 async function home(){ await saveNow(); S.rec=null; S.list=await dbAll(); render(); }
 
 document.addEventListener('click',async e=>{
-  const t=e.target.closest('[data-chip],[data-act],[data-open],[data-sdel],[data-pdel],[data-goto],[data-state],[data-seg],[data-nbchip],[data-filtro]'); if(!t) return;
+  const t=e.target.closest('[data-qa],[data-chip],[data-act],[data-open],[data-sdel],[data-pdel],[data-goto],[data-state],[data-seg],[data-nbchip],[data-filtro]'); if(!t) return;
+  if(t.dataset.qa){ e.stopPropagation(); const r=recById(t.dataset.id), at=attention(r);
+    if(t.dataset.qa==='fatta'){ const d=draftFrom(r); if(at.kind==='prova') d.provaFatta=true; else { d.confermato=true; d.defFatto=true; } applyDraft(r,d); await dbPut(r); render(true); toast(at.kind==='prova'?'Prova segnata come fatta: ora è in Da confermare':'Trucco segnato come fatto'); }
+    else if(t.dataset.qa==='sposta'){ S.sheet={type:'sposta',id:r.id,kind:at.kind,date:at.kind==='prova'?(r.anag.dataProva||''):(r.anag.dataEvento||''),ora:r.anag.oraProva||''}; renderSheet(); }
+    else { S.sheet={type:'stato',id:r.id,draft:draftFrom(r)}; renderSheet(); }
+    return; }
   if(t.dataset.filtro){ S.filtro=t.dataset.filtro; $('#agenda').innerHTML=agendaHtml(); return; }
   if(t.dataset.state){ e.stopPropagation(); const r=recById(t.dataset.state); S.sheet={type:'stato',id:r.id,draft:draftFrom(r)}; renderSheet(); return; }
   if(t.dataset.seg){ segSet(t.dataset.seg,t.dataset.val); renderSheet(); return; }
@@ -778,12 +822,14 @@ document.addEventListener('click',async e=>{
     case 'savenew': saveNuovo(false); break;
     case 'savenewgo': saveNuovo(true); break;
     case 'sheetclose': closeSheet(); break;
+    case 'piu': S.piu=!S.piu; $('#agenda').innerHTML=agendaHtml(); break;
+    case 'savesposta': { const sh=S.sheet, r=recById(sh.id); if(!sh.date){ toast('Inserisci la data'); break; } if(sh.kind==='prova'){ r.anag.dataProva=sh.date; r.anag.oraProva=sh.ora||''; } else r.anag.dataEvento=sh.date; r.updated=Date.now(); await dbPut(r); closeSheet(); render(true); toast('Data aggiornata'); break; }
     case 'overlay': if(S.sheet&&S.sheet.type==='stato'&&statoDirty()) toast('Modifiche non salvate: usa Salva o Annulla'); else closeSheet(); break;
-    case 'savestato': { const sh=S.sheet, r=recById(sh.id); applyDraft(r,sh.draft); await dbPut(r); closeSheet(); render(true); toast('Salvato'); break; }
-    case 'close': if(stId(S.rec)==='da-fare'){ S.sheet={type:'chiudi'}; renderSheet(); } else home(); break;
-    case 'closepaid': { const d=draftFrom(S.rec); d.provaFatta=true; d.provaInc=true; applyDraft(S.rec,d); } await saveNow(); closeSheet(); home(); break;
-    case 'closeunpaid': { const d=draftFrom(S.rec); d.provaFatta=true; d.provaInc=false; applyDraft(S.rec,d); } await saveNow(); closeSheet(); home(); break;
-    case 'closeno': closeSheet(); home(); break;
+    case 'savestato': { const sh=S.sheet, r=recById(sh.id); if(sh.draft.confermato&&!sh.draft.dataEvento&&!sh.draft.annullata){ toast('Inserisci la data del trucco definitivo'); break; } applyDraft(r,sh.draft); await dbPut(r); closeSheet(); render(true); toast('Salvato'); break; }
+    case 'close': if(stId(S.rec)==='da-fare'){ S.sheet={type:'chiudi'}; renderSheet(); } else { await home(); toast('Agenda aggiornata'); } break;
+    case 'closepaid': { const d=draftFrom(S.rec); d.provaFatta=true; d.provaInc=true; applyDraft(S.rec,d); } await saveNow(); closeSheet(); await home(); toast('Agenda aggiornata: la scheda è in Da confermare'); break;
+    case 'closeunpaid': { const d=draftFrom(S.rec); d.provaFatta=true; d.provaInc=false; applyDraft(S.rec,d); } await saveNow(); closeSheet(); await home(); toast('Agenda aggiornata: la scheda è in Da confermare'); break;
+    case 'closeno': closeSheet(); await home(); toast('Agenda aggiornata'); break;
     case 'home': home(); break;
     case 'next': go(S.step+1); break;
     case 'prev': go(S.step-1); break;
@@ -796,13 +842,16 @@ document.addEventListener('toggle',e=>{ const d=e.target; if(d.dataset&&d.datase
 document.addEventListener('input',e=>{
   const t=e.target;
   if(t.dataset.nb){ S.nuovo[t.dataset.nb]=t.value; }
+  else if(t.dataset.sp){ S.sheet[t.dataset.sp]=t.value; }
+  else if(t.hasAttribute('data-dd')){ S.sheet.draft.dataEvento=t.value; }
   else if(t.dataset.bind){ setp(S.rec,t.dataset.bind,t.value); touch(); }
   else if(t.dataset.step){ const s=S.rec.prova.steps.find(x=>x.id===t.dataset.step); if(s){ s[t.dataset.k]=t.value; touch(); } }
   else if(t.id==='search'){ S.q=t.value; $('#clist').innerHTML=homeList(); }
 });
 document.addEventListener('change',async e=>{
   const t=e.target;
-  if(t.id==='periodo'){ S.periodo=t.value; $('#agenda').innerHTML=agendaHtml(); }
+  if(t.hasAttribute('data-dd')){ S.sheet.draft.dataEvento=t.value; renderSheet(); }
+  else if(t.id==='periodo'){ S.periodo=t.value; $('#agenda').innerHTML=agendaHtml(); }
   else if(t.dataset.plabel){ const f=S.rec.photos.find(x=>x.id===t.dataset.plabel); if(f){f.label=t.value; touch();} }
   else if(t.classList.contains('phin')){ const files=[...t.files]; t.value=''; if(!files.length) return; let ok=0; for(const f of files){ try{ S.rec.photos.push({id:uid(),label:'Prova',data:await shrink(f)}); ok++; }catch(_){ toast('Foto non leggibile (formato non supportato?)'); } } if(ok){ touch(); await saveNow(); render(true); toast(ok+(ok>1?' foto aggiunte':' foto aggiunta')); } }
 });
