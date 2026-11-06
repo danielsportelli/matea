@@ -680,19 +680,41 @@ async function buildPdf(r){
       doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...CH); doc.text(doc.splitTextToSize(lat(n),26),x+12,y+5.6); });
     y+=14; };
 
-  section('Anagrafica');
-  kv('Tipo evento',a.occasione); kv('Email',a.email); kv('Telefono',a.tel); kv(a.occasione==='Sposa'?'Data nozze':'Data',a.dataEvento); kv('Luogo del trucco',a.luogo); kv('Orario',orario(a)); kv('Note',a.note);
+  /* ---------- PAGINA 1: anagrafica + viso (2 colonne), poi armocromia ---------- */
+  const CWc=(CW-10)/2, X2=M+CWc+10, g3=(CW-16)/3;
+  const titleAt=(x,yy,t)=>{ doc.setFont('times','normal'); doc.setFontSize(16); doc.setTextColor(...CH); doc.text(lat(t),x,yy); doc.setDrawColor(...GOLD); doc.setLineWidth(.35); doc.line(x,yy+2.5,x+14,yy+2.5); return yy+9; };
+  const itemsAt=(x,w,yy,items)=>{ items.forEach(([k,val])=>{ val=listVal(val); if(!String(val).trim()) return;
+    const L=doc.splitTextToSize(lat(val),w); doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...TAUPE); doc.text(lat(k).toUpperCase(),x,yy,{charSpace:.6}); yy+=4.2;
+    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(...CH); doc.text(L,x,yy); yy+=L.length*4.6+2.6; }); return yy; };
 
-  section('Viso');
-  kv('Forma del viso',v.forma&&FACES[v.forma].n); kv('Tipo di pelle',v.pelle); kv('Forma degli occhi',v.occhi); kv('Labbra',v.labbra); kv('Note',v.note);
+  let ya=titleAt(M,y+4,'Anagrafica'), yb=titleAt(X2,y+4,'Viso');
+  ya=itemsAt(M,CWc,ya,[['Tipo evento',a.occasione],['Email',a.email],['Telefono',a.tel],[a.occasione==='Sposa'?'Data nozze':'Data',fmtIso(a.dataEvento)],['Luogo del trucco',a.luogo],['Orario',orario(a)],['Note',a.note]]);
+  yb=itemsAt(X2,CWc,yb,[['Forma del viso',v.forma&&FACES[v.forma].n],['Tipo di pelle',v.pelle],['Forma degli occhi',v.occhi],['Labbra',v.labbra],['Note',v.note]]);
+  y=Math.max(ya,yb)+2;
 
-  section('Armocromia');
-  kv('Sottotono',c.sottotono); kv('Intensita',c.croma); kv('Profondita',c.profondita); kv('Capelli',c.capelli); kv('Occhi',c.occhiCol);
-  if(c.sub) kv('Stagione',subName(c.sub)); kv('Note',c.note);
-  if(d){ sw('Occhi',d.occhi); sw('Labbra',d.labbra); sw('Blush',d.blush); kv('Metalli',d.m); }
+  doc.setDrawColor(225,220,212); doc.setLineWidth(.3); doc.line(M,y,W-M,y); y+=9;
+  y=titleAt(M,y,'Armocromia');
+  const arr=[['Sottotono',c.sottotono],['Intensita',c.croma],['Profondita',c.profondita],['Capelli',c.capelli],['Occhi',c.occhiCol],['Stagione',c.sub&&subName(c.sub)]];
+  for(let row=0;row<2;row++){ let ym=y; for(let i=0;i<3;i++){ const yy=itemsAt(M+i*(g3+8),g3,y,[arr[row*3+i]]); ym=Math.max(ym,yy); } y=ym; }
+  if(d){
+    y+=1; doc.setFont('times','italic'); doc.setFontSize(12); doc.setTextColor(...CH);
+    const L=doc.splitTextToSize(lat(d.d+' Metalli: '+d.m+'.'),CW); doc.text(L,M,y); y+=L.length*5+4;
+    [['Occhi',d.occhi],['Labbra',d.labbra],['Blush',d.blush]].forEach(([lab,list],i)=>{
+      const x=M+i*(g3+8); let yy=y;
+      doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...TAUPE); doc.text(lab.toUpperCase(),x,yy,{charSpace:.6}); yy+=4;
+      list.forEach(([n,h])=>{ doc.setFillColor(...hex2rgb(h)); doc.setDrawColor(225,220,212); doc.setLineWidth(.2); doc.circle(x+5.5,yy+5.5,5.5,'FD');
+        doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...CH); doc.text(doc.splitTextToSize(lat(n),g3-15),x+14,yy+6.2); yy+=13; });
+    });
+    y+=4+13*3;
+  }
+  kv('Note armocromia',c.note);
 
-  section('Aspettative');
-  kv('Stile',s.stili); kv('Finish',s.finish); kv('Intensita occhi',s.occhi); kv('Labbra',s.labbra); kv('Resistenza',s.resa); kv('Riferimenti',s.rif); kv('Da evitare',s.evitare); kv('Allergie',s.allergie);
+  /* ---------- PAGINA 2: aspettative + linee guida ---------- */
+  np();
+  y=titleAt(M,y+4,'Aspettative');
+  let yl=itemsAt(M,CWc,y,[['Stile',s.stili],['Finish',s.finish],['Intensita occhi',s.occhi],['Labbra',s.labbra],['Resistenza',s.resa]]);
+  let yr=itemsAt(X2,CWc,y,[['Riferimenti',s.rif],['Da evitare',s.evitare],['Allergie',s.allergie]]);
+  y=Math.max(yl,yr)+2;
 
   if(v.forma){
     const f=FACES[v.forma]; section('Linee guida - viso '+f.n.toLowerCase());
@@ -715,6 +737,7 @@ async function buildPdf(r){
   }
 
   if(r.photos.length){
+    if(y>H-M-110) np();
     section('Foto della prova');
     const gw=(CW-8)/2; let col=0, rowH=0, ry=y;
     for(const f of r.photos){
