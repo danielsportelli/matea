@@ -163,7 +163,15 @@
   .toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:calc(var(--safe-bottom) + 90px); background:var(--charcoal); color:#fff; padding:12px 18px; border-radius:2px; font-size:14px; z-index:50; max-width:90%; }
   /* pannelli (card solo bordo) */
   .panel{ border:1px solid var(--beige); border-radius:2px; padding:22px 18px 8px; margin-top:28px; }
-  .panel > h2{ margin:0 0 16px; font-weight:700; font-size:32px; letter-spacing:.005em; }
+  .panel > h2{ margin:0 0 16px; font-weight:700; font-size:30px; line-height:1.15; letter-spacing:.005em; }
+  .panel.form{ padding-bottom:22px; margin-top:18px; }
+  .panel.form > h2 + label.f, .panel.form > h2 + p.hint{ margin-top:0; }
+  h1.stepT{ font-weight:700; font-size:clamp(34px,10vw,42px); line-height:1.12; margin-bottom:10px; }
+  h1.big{ font-weight:700; }
+  .panel .pstep{ background:transparent; border:0; border-bottom:1px solid var(--beige); border-radius:0; padding:12px 0; margin:0; }
+  .panel .pstep:last-of-type{ border-bottom:0; }
+  .ptag{ display:inline-block; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; background:#F5EDD6; color:#6a5a25; margin:7px 6px 0 0; }
+  .ptag.ok{ background:var(--tint-sage); color:#4f5f52; }
   .hl{ background:linear-gradient(transparent 56%, rgba(138,155,140,.42) 56%); padding:0 5px; margin:0 -5px; -webkit-box-decoration-break:clone; box-decoration-break:clone; }
   .panel .fchips{ margin:0 -18px; padding-left:18px; padding-right:18px; }
   .panel .dayhead:first-of-type{ margin-top:14px; }
@@ -193,7 +201,8 @@
   .opt{ display:flex; align-items:center; width:100%; text-align:left; background:#fff; border:1px solid var(--beige); border-radius:2px; padding:15px 16px; min-height:52px; margin-top:8px; font:500 15px 'Manrope',sans-serif; color:var(--charcoal); cursor:pointer; }
   .opt.on{ border-color:var(--gold); box-shadow:0 0 0 2px var(--gold) inset; background:#FBF8F0; }
   input[type=file]{ position:absolute; width:1px; height:1px; opacity:0; overflow:hidden; pointer-events:none; }
-  input[type=time],input[type=date]{ min-height:50px; }
+  input[type=time],input[type=date]{ min-height:50px; min-width:0; max-width:100%; }
+  .row > .grow{ min-width:0; }
   details.how{ background:var(--tint-sage); border-radius:2px; margin:0 0 14px; }
   details.how summary{ list-style:none; cursor:pointer; padding:13px 16px; min-height:44px; font-size:14px; font-weight:600; color:#4f5f52; display:flex; justify-content:space-between; align-items:center; }
   details.how summary::-webkit-details-marker{ display:none; }
@@ -446,10 +455,15 @@ const STATI=[
   {id:'da-fare',s:'Da fare',n:'Prova da fare',c:'#C9B37E'},
   {id:'attesa',s:'In attesa',n:'Prova eseguita, in attesa di conferma',c:'#B9AA9B'},
   {id:'confermato',s:'Confermato',n:'Confermato, trucco da fare',c:'#8A9B8C'},
-  {id:'concluso',s:'Concluso',n:'Trucco concluso',c:'#2B2B2B'},
+  {id:'concluso',s:'Eseguito',n:'Trucco eseguito',c:'#2B2B2B'},
   {id:'annullato',s:'Annullato',n:'Non confermato / annullato',c:'#C4A3A0'}];
 const ATTIVI=['da-fare','attesa','confermato'];
 const stId=r=>r.stato||'da-fare';
+function payTags(r){ const st=stId(r), p=r.pag||{}, t=[]; if(st==='annullato') return t;
+  if(['attesa','confermato','concluso'].includes(st)&&!p.prova) t.push('Prova da incassare');
+  if(st==='concluso'&&!p.saldo) t.push('Saldo da incassare'); return t; }
+const isClosed=r=>stId(r)==='concluso'&&r.pag&&r.pag.prova&&r.pag.saldo;
+const tagsHtml=r=>{ const t=payTags(r).map(x=>`<span class="ptag">€ ${x}</span>`).join(''); return (t||isClosed(r))?`<div class="tags">${t}${isClosed(r)?'<span class="ptag ok">✓ Chiusa</span>':''}</div>`:''; };
 const stOf=r=>STATI.find(x=>x.id===stId(r))||STATI[0];
 const stChip=(r,big)=>`<button type="button" class="st${big?' big':''}" data-state="${r.id}"><i class="sd" style="background:${stOf(r).c}"></i>${stOf(r).s}</button>`;
 const recById=id=>(S.rec&&S.rec.id===id)?S.rec:S.list.find(r=>r.id===id);
@@ -464,13 +478,14 @@ function agendaDate(r){ return (stId(r)==='confermato'||stId(r)==='concluso')?(r
 function agendaKey(r){ return (agendaDate(r)||'9999-99-99')+(stId(r)==='da-fare'?(r.anag.oraProva||'99:99'):''); }
 function agendaHtml(){
   const f=S.filtro; const cnt=id=>S.list.filter(r=>stId(r)===id).length;
-  const opts=[...STATI.map(x=>({id:x.id,s:x.s,c:x.c,n:cnt(x.id)})),{id:'tutti',s:'Tutti',c:null,n:S.list.length}];
+  const nInc=S.list.filter(r=>payTags(r).length).length;
+  const opts=[...STATI.filter(x=>x.id!=='annullato').map(x=>({id:x.id,s:x.s,c:x.c,n:cnt(x.id)})),{id:'incasso',s:'Da incassare',c:'#B8923E',n:nInc},{id:'annullato',s:'Annullato',c:STATI[4].c,n:cnt('annullato')},{id:'tutti',s:'Tutti',c:null,n:S.list.length}];
   const chipsH=`<div class="fchips">${opts.map(o=>`<button type="button" class="chip${f===o.id?' on':''}" data-filtro="${o.id}">${o.c?`<i class="sd" style="background:${o.c}"></i>`:''}${o.s}<span class="cnt">${o.n}</span></button>`).join('')}</div>`;
   const months=[...new Set(S.list.map(r=>agendaDate(r).slice(0,7)).filter(Boolean))].sort();
   if(S.periodo&&!months.includes(S.periodo)) S.periodo='';
   const mlab=m=>dayHead(m+'-15',true);
   const per=months.length?`<select id="periodo" aria-label="Periodo" style="margin:4px 0 2px"><option value="">Periodo: tutti</option>${months.map(m=>`<option value="${m}"${S.periodo===m?' selected':''}>${mlab(m)}</option>`).join('')}</select>`:'';
-  let items=S.list.filter(r=>f==='tutti'||stId(r)===f);
+  let items=S.list.filter(r=>f==='tutti'||(f==='incasso'?payTags(r).length>0:stId(r)===f));
   if(S.periodo) items=items.filter(r=>agendaDate(r).slice(0,7)===S.periodo);
   const today=todayIso(), key=agendaKey;
   const desc=(f==='concluso'||f==='annullato');
@@ -486,9 +501,9 @@ function agendaHtml(){
     const dd=iso?new Date(iso+'T12:00:00'):null;
     const ev=(stId(r)==='confermato'||stId(r)==='concluso')&&r.anag.dataEvento, lab=ev?'evento':'';
     const when=iso?`<b>${dd.getDate()}</b><span>${dd.toLocaleDateString('it-IT',{month:'short'}).replace('.','')}</span><i>${[lab,stId(r)==='da-fare'&&r.anag.oraProva?esc(r.anag.oraProva):''].filter(Boolean).join(' · ')}</i>`:`<b>–</b><span>senza data</span>`;
-    body+=`<div class="ag" data-open="${r.id}"><div class="agd">${when}</div><div class="grow"><div class="nm">${esc(fullName(r))}</div><div class="meta">${esc(r.anag.occasione||'Consulenza')}${r.anag.tel?' · '+esc(r.anag.tel):''}</div></div>${stChip(r)}</div>`;
+    body+=`<div class="ag" data-open="${r.id}"><div class="agd">${when}</div><div class="grow"><div class="nm">${esc(fullName(r))}</div><div class="meta">${esc(r.anag.occasione||'Consulenza')}${r.anag.tel?' · '+esc(r.anag.tel):''}</div>${tagsHtml(r)}</div>${stChip(r)}</div>`;
   });
-  if(!items.length) body=`<div class="empty" style="padding:26px 10px">${f==='da-fare'?'Nessuna prova da fare.':f==='tutti'?'Nessuna scheda.':'Nessuna scheda in questo stato.'}</div>`;
+  if(!items.length) body=`<div class="empty" style="padding:26px 10px">${f==='da-fare'?'Nessuna prova da fare.':f==='incasso'?'Nessun incasso in sospeso.':f==='tutti'?'Nessuna scheda.':'Nessuna scheda in questo stato.'}</div>`;
   return chipsH+per+body;
 }
 const norm=x=>String(x||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
@@ -501,7 +516,7 @@ function homeList(){
     (l.length?l.map(card).join(''):`<div class="empty">${q?'Nessuna scheda trovata.':'Nessuna scheda ancora.'}</div>`);
 }
 function viewHome(){
-  return `<span class="eyebrow">Primo incontro</span><h1>Consulenza e prova trucco</h1>
+  return `<span class="eyebrow">Primo incontro</span><h1 class="big">Consulenza e prova trucco</h1>
   <p class="lead">Agenda delle prove e schede delle clienti.</p>
   <button class="btn" data-act="newappt">+ Nuovo appuntamento</button>
   <button class="linkact" data-act="new">oppure inizia subito una consulenza</button>
@@ -511,33 +526,32 @@ function viewHome(){
   <div id="clist" style="margin-top:16px">${homeList()}</div></section>`;
 }
 
+const H1=(t,lead)=>`<h1 class="stepT"><span class="hl">${t}</span></h1>${lead?`<p class="lead">${lead}</p>`:''}`;
+const card=(title,body,cls)=>`<section class="panel form${cls?' '+cls:''}"><h2><span class="hl">${title}</span></h2>${body}</section>`;
 function viewAnag(){
-  const sposa=S.rec.anag.occasione==='Sposa';
-  return `<h1>Chi è la cliente</h1><p class="lead">Dati di contatto e occasione del trucco.</p>
-  ${field('Nome','anag.nome','text')}${field('Cognome','anag.cognome','text')}
-  ${field('Email','anag.email','email')}${field('Telefono','anag.tel','tel')}
-  <div class="row" style="align-items:flex-end"><div class="grow" style="flex:1.4">${field('Giorno della prova trucco','anag.dataProva','date')}</div><div class="grow">${field('Ora','anag.oraProva','time')}</div></div>
-  <label class="f">Tipo di evento</label>${chips('anag.occasione',['Sposa','Cerimonia','Serata / evento','Servizio foto','Quotidiano','Altro'])}
+  const a=S.rec.anag, sposa=a.occasione==='Sposa';
+  return H1('Chi è la cliente','Contatti, prova e dettagli dell\'evento.')+
+  card('Contatti',field('Nome','anag.nome','text')+field('Cognome','anag.cognome','text')+field('Email','anag.email','email')+field('Telefono','anag.tel','tel'))+
+  card('Prova trucco',`<div class="row" style="align-items:flex-start"><div class="grow" style="flex:1.15">${field('Giorno','anag.dataProva','date')}</div><div class="grow">${field('Ora','anag.oraProva','time')}</div></div>`)+
+  card('Evento',`<label class="f">Tipo di evento</label>${chips('anag.occasione',['Sposa','Cerimonia','Serata / evento','Servizio foto','Quotidiano','Altro'])}
   ${field(sposa?'Data delle nozze':'Data del trucco','anag.dataEvento','date')}
   ${field('Luogo del trucco','anag.luogo','text','Dove avverrà il trucco (indirizzo / struttura)')}
   <label class="f">Fascia oraria del trucco</label>
-  <div class="row"><div class="grow"><p class="hint" style="margin:0 0 6px">Inizio previsto</p><input type="time" data-bind="anag.oraInizio" value="${esc(S.rec.anag.oraInizio||'')}"></div>
-  <div class="grow"><p class="hint" style="margin:0 0 6px">Fine massima</p><input type="time" data-bind="anag.oraFine" value="${esc(S.rec.anag.oraFine||'')}"></div></div>
-  <p class="hint" style="margin-top:8px">${sposa?'Il trucco si fa di solito il giorno delle nozze: l\'orario massimo di fine è il vincolo da rispettare.':'Indica entro che ora il trucco deve essere concluso.'}</p>
-  ${area('Note','anag.note','Altre informazioni utili')}`;
+  <div class="row"><div class="grow"><p class="hint" style="margin:0 0 6px">Inizio previsto</p><input type="time" data-bind="anag.oraInizio" value="${esc(a.oraInizio||'')}"></div>
+  <div class="grow"><p class="hint" style="margin:0 0 6px">Fine massima</p><input type="time" data-bind="anag.oraFine" value="${esc(a.oraFine||'')}"></div></div>
+  <p class="hint" style="margin-top:8px">${sposa?'Il trucco si fa di solito il giorno delle nozze: l\'orario massimo di fine è il vincolo da rispettare.':'Indica entro che ora il trucco deve essere concluso.'}</p>`)+
+  card('Note',area('','anag.note','Altre informazioni utili'));
 }
-
 function viewViso(){
   const k=S.rec.viso.forma; const f=k&&FACES[k];
-  return `<h1>Forma del viso</h1><p class="lead">Guardate insieme le geometrie e scegliete quella più vicina al viso della cliente.</p>
-  <div class="faces">${FACE_ORDER.map(x=>`<button type="button" class="face${k===x?' on':''}" data-chip="viso.forma" data-val="${x}">${faceSvg(x,false)}<span class="fn">${FACES[x].n}</span></button>`).join('')}</div>
-  ${f?`<div class="shapeinfo"><b>${f.n}</b>${esc(f.d)}</div>`:''}
-  <label class="f">Tipo di pelle</label>${chips('viso.pelle',['Secca','Mista','Grassa','Sensibile','Matura','Rossori / couperose','Imperfezioni'],1)}
+  return H1('Forma del viso','Guardate insieme le geometrie e scegliete quella più vicina al viso della cliente.')+
+  card('Forma del viso',`<div class="faces">${FACE_ORDER.map(x=>`<button type="button" class="face${k===x?' on':''}" data-chip="viso.forma" data-val="${x}">${faceSvg(x,false)}<span class="fn">${FACES[x].n}</span></button>`).join('')}</div>
+  ${f?`<div class="shapeinfo"><b>${f.n}</b>${esc(f.d)}</div>`:''}`)+
+  card('Pelle, occhi e labbra',`<label class="f">Tipo di pelle</label>${chips('viso.pelle',['Secca','Mista','Grassa','Sensibile','Matura','Rossori / couperose','Imperfezioni'],1)}
   <label class="f">Forma degli occhi</label>${chips('viso.occhi',['Mandorla','Tondi','Incappucciati','Ravvicinati','Distanziati','All\'ingiù','All\'insù','Piccoli','Grandi'],1)}
-  <label class="f">Labbra</label>${chips('viso.labbra',['Sottili','Carnose','Labbro sup. sottile','Labbro inf. pieno','Asimmetriche','Cupido marcato'],1)}
-  ${area('Note sul viso','viso.note','es. asimmetrie, nei, occhiaie, cicatrici')}`;
+  <label class="f">Labbra</label>${chips('viso.labbra',['Sottili','Carnose','Labbro sup. sottile','Labbro inf. pieno','Asimmetriche','Cupido marcato'],1)}`)+
+  card('Note sul viso',area('','viso.note','es. asimmetrie, nei, occhiaie, cicatrici'));
 }
-
 function palette(arr){return `<div class="pal">${arr.map(([n,c])=>`<div class="sw"><i style="background:${c}"></i>${esc(n)}</div>`).join('')}</div>`;}
 const HOW={
  prep:['Prima di cominciare: come preparare l\'analisi',`<ul>
@@ -578,82 +592,69 @@ function how(id){
 }
 function viewColori(){
   const c=S.rec.colori; const season=seasonOf(c);
-  let h=`<h1>Armocromia</h1><p class="lead">Osservate la pelle a luce naturale, senza trucco.</p>
-  ${how('prep')}
-  <label class="f">Sottotono della pelle</label>
-  ${chips('colori.sottotono',['Caldo','Neutro caldo','Neutro freddo','Freddo'])}<div style="height:10px"></div>${how('sotto')}
-  <label class="f">Intensità / contrasto</label>
-  ${chips('colori.croma',['Morbido','Brillante'])}<div style="height:10px"></div>${how('croma')}
-  <label class="f">Profondità generale</label>${chips('colori.profondita',['Chiaro','Medio','Scuro'])}<div style="height:10px"></div>${how('prof')}
-  ${field('Colore naturale dei capelli','colori.capelli','text')}${field('Colore degli occhi','colori.occhiCol','text')}`;
+  let h=H1('Armocromia','Osservate la pelle a luce naturale, senza trucco.')+
+  card('Preparazione',how('prep'))+
+  card('Sottotono della pelle',chips('colori.sottotono',['Caldo','Neutro caldo','Neutro freddo','Freddo'])+'<div style="height:12px"></div>'+how('sotto'))+
+  card('Intensità e contrasto',chips('colori.croma',['Morbido','Brillante'])+'<div style="height:12px"></div>'+how('croma'))+
+  card('Profondità generale',chips('colori.profondita',['Chiaro','Medio','Scuro'])+'<div style="height:12px"></div>'+how('prof'))+
+  card('Colori naturali',field('Capelli','colori.capelli','text')+field('Occhi','colori.occhiCol','text'));
   if(season){
     const sug=c.profondita?SUGG[season][c.profondita.toLowerCase()]:null;
-    h+=`<div class="season"><span class="eyebrow">Stagione suggerita</span><b>${season}</b>${esc(SEASON_D[season])}</div>
+    h+=card('Stagione e sottostagione',`<div class="season" style="margin-top:0"><span class="eyebrow">Stagione suggerita</span><b>${season}</b>${esc(SEASON_D[season])}</div>
     <label class="f">Sottostagione</label><p class="hint">La proposta si basa sulla profondità. La scelta finale è di Giorgia.</p>${how('sub')}
-    <div class="subs">${SUBS[season].map(([id,n],i)=>`<button type="button" class="sub${c.sub===id?' on':''}" data-chip="colori.sub" data-val="${id}"><b>${n}${sug===i?'<span class="tag">consigliata</span>':''}</b><span>${esc(SD[id].d)}</span></button>`).join('')}</div>`;
+    <div class="subs">${SUBS[season].map(([id,n],i)=>`<button type="button" class="sub${c.sub===id?' on':''}" data-chip="colori.sub" data-val="${id}"><b>${n}${sug===i?'<span class="tag">consigliata</span>':''}</b><span>${esc(SD[id].d)}</span></button>`).join('')}</div>`);
   }
   if(c.sub&&SD[c.sub]&&seasonOfSub(c.sub)===season){
     const d=SD[c.sub];
-    h+=`<h2>Palette: ${subName(c.sub)}</h2><span class="eyebrow">Occhi</span>${palette(d.occhi)}<span class="eyebrow">Labbra</span>${palette(d.labbra)}<span class="eyebrow">Blush</span>${palette(d.blush)}<p class="hint">Metalli e gioielli: ${esc(d.m)}.</p>`;
+    h+=card('Palette: '+subName(c.sub),`<span class="eyebrow">Occhi</span>${palette(d.occhi)}<span class="eyebrow">Labbra</span>${palette(d.labbra)}<span class="eyebrow">Blush</span>${palette(d.blush)}<p class="hint">Metalli e gioielli: ${esc(d.m)}.</p>`);
   }
-  return h+area('Note armocromia','colori.note','');
+  return h+card('Note armocromia',area('','colori.note',''));
 }
-
 function viewAsp(){
-  return `<h1>Aspettative</h1><p class="lead">Che trucco si immagina la cliente?</p>
-  <label class="f">Stile</label>${chips('asp.stili',['Naturale / effetto nudo','Soft glam','Glamour','Classico','Romantico','Moderno / grafico','Da sera'],1)}
-  <label class="f">Finish della pelle</label>${chips('asp.finish',['Luminoso','Satinato','Matte'])}
+  return H1('Aspettative','Che trucco si immagina la cliente?')+
+  card('Stile',chips('asp.stili',['Naturale / effetto nudo','Soft glam','Glamour','Classico','Romantico','Moderno / grafico','Da sera'],1))+
+  card('Pelle, occhi e labbra',`<label class="f">Finish della pelle</label>${chips('asp.finish',['Luminoso','Satinato','Matte'])}
   <label class="f">Intensità occhi</label>${chips('asp.occhi',['Delicata','Media','Intensa'])}
-  <label class="f">Labbra</label>${chips('asp.labbra',['Nude','Rosa','Corallo','Rosso','Scure / bordeaux','Lucide'])}
-  <label class="f">Resistenza</label>${chips('asp.resa',['Resistente alle lacrime','Lunga durata','Ritocchi in giornata'],1)}
-  ${area('Riferimenti / ispirazioni','asp.rif','Descrivi il look o incolla un link')}
-  ${area('Da evitare','asp.evitare','')}
-  ${field('Allergie / intolleranze','asp.allergie','text')}`;
+  <label class="f">Labbra</label>${chips('asp.labbra',['Nude','Rosa','Corallo','Rosso','Scure / bordeaux','Lucide'])}`)+
+  card('Resistenza',chips('asp.resa',['Resistente alle lacrime','Lunga durata','Ritocchi in giornata'],1))+
+  card('Dettagli',area('Riferimenti / ispirazioni','asp.rif','Descrivi il look o incolla un link')+area('Da evitare','asp.evitare','')+field('Allergie / intolleranze','asp.allergie','text'));
 }
-
 function viewGuida(){
   const k=S.rec.viso.forma;
-  if(!k) return `<h1>Linee guida</h1><p class="lead">Scegli prima la forma del viso per vedere dove posizionare luci, contouring e blush.</p><button class="btn" data-goto="1">Vai alla forma del viso</button>`;
+  if(!k) return H1('Linee guida','Scegli prima la forma del viso per vedere dove posizionare luci, contouring e blush.')+`<button class="btn" data-goto="1">Vai alla forma del viso</button>`;
   const f=FACES[k], g=f.g, c=S.rec.colori, d=c.sub&&SD[c.sub];
-  return `<h1>Viso ${f.n.toLowerCase()}</h1><p class="lead">Guida per costruire la fisionomia più armonica. Indicazioni di base: la valutazione finale è di Giorgia.</p>
-  <div class="diagram">${faceSvg(k,true)}<div class="legend"><span><i style="background:#C9B37E"></i>Luce</span><span><i style="background:#7d6657"></i>Contouring</span><span><i style="background:#D9847C"></i>Blush</span></div></div>
-  <dl class="guide"><dt>Obiettivo</dt><dd>${esc(g.obiettivo)}</dd><dt>Contouring</dt><dd>${esc(g.contouring)}</dd><dt>Blush</dt><dd>${esc(g.blush)}</dd><dt>Punti luce</dt><dd>${esc(g.luce)}</dd><dt>In più</dt><dd>${esc(g.extra)}</dd>
-  ${d?`<dt>Colori (${subName(c.sub)})</dt>${palette([...d.occhi,...d.labbra,...d.blush])}`:''}</dl>`;
+  return H1('Viso '+f.n.toLowerCase(),'Guida per costruire la fisionomia più armonica. Indicazioni di base: la valutazione finale è di Giorgia.')+
+  card('Schema',`<div class="diagram" style="border:0;padding:0">${faceSvg(k,true)}<div class="legend"><span><i style="background:#C9B37E"></i>Luce</span><span><i style="background:#7d6657"></i>Contouring</span><span><i style="background:#D9847C"></i>Blush</span></div></div>`)+
+  card('Linee guida',`<dl class="guide" style="margin-top:-8px"><dt>Obiettivo</dt><dd>${esc(g.obiettivo)}</dd><dt>Contouring</dt><dd>${esc(g.contouring)}</dd><dt>Blush</dt><dd>${esc(g.blush)}</dd><dt>Punti luce</dt><dd>${esc(g.luce)}</dd><dt>In più</dt><dd>${esc(g.extra)}</dd></dl>`)+
+  (d?card('Colori · '+subName(c.sub),palette([...d.occhi,...d.labbra,...d.blush])):'');
 }
-
 function viewProva(){
   const p=S.rec.prova;
-  return `<h1>Prova trucco</h1><p class="lead">Segna i passaggi, i prodotti e le tecniche usate.</p>
-  ${p.steps.map((s,i)=>`<div class="pstep"><div class="head"><span class="num">${i+1}</span><input type="text" data-step="${s.id}" data-k="nome" value="${esc(s.nome)}" placeholder="Passaggio"><button class="linkbtn" data-sdel="${s.id}" aria-label="Elimina" style="font-size:22px;color:var(--taupe)">×</button></div>
+  return H1('Prova trucco','Segna i passaggi, i prodotti e le tecniche usate.')+
+  card('Passaggi',`${p.steps.map((s,i)=>`<div class="pstep"><div class="head"><span class="num">${i+1}</span><input type="text" data-step="${s.id}" data-k="nome" value="${esc(s.nome)}" placeholder="Passaggio"><button class="linkbtn" data-sdel="${s.id}" aria-label="Elimina" style="font-size:22px;color:var(--taupe)">×</button></div>
   <textarea data-step="${s.id}" data-k="note" placeholder="Prodotto, tonalità, tecnica, pennello…">${esc(s.note)}</textarea></div>`).join('')}
-  <button class="btn ghost" data-act="addstep">+ Aggiungi passaggio</button>
-  ${area('Note della prova','prova.note','Cosa è piaciuto, cosa cambiare')}
-  ${area('Da modificare per il giorno','prova.giorno','')}
-  <h2>Foto della prova</h2>
-  <div class="stack"><label class="btn sage" style="cursor:pointer">Scatta una foto<input type="file" class="phin" accept="image/*" capture="environment"></label>
+  <button class="btn ghost" data-act="addstep" style="margin-top:14px">+ Aggiungi passaggio</button>`)+
+  card('Note',area('Note della prova','prova.note','Cosa è piaciuto, cosa cambiare')+area('Da modificare per il giorno','prova.giorno',''))+
+  card('Foto della prova',`<div class="stack"><label class="btn sage" style="cursor:pointer">Scatta una foto<input type="file" class="phin" accept="image/*" capture="environment"></label>
   <label class="btn ghost" style="cursor:pointer">Scegli dalla galleria<input type="file" class="phin" accept="image/*" multiple></label></div>
-  <div class="photos">${S.rec.photos.map(f=>`<div class="ph"><img src="${f.data}" alt=""><select data-plabel="${f.id}">${['Prova','Prima','Dopo','Riferimento'].map(l=>`<option${f.label===l?' selected':''}>${l}</option>`).join('')}</select><button class="del" data-pdel="${f.id}">Elimina</button></div>`).join('')}</div>`;
+  <div class="photos">${S.rec.photos.map(f=>`<div class="ph"><img src="${f.data}" alt=""><select data-plabel="${f.id}">${['Prova','Prima','Dopo','Riferimento'].map(l=>`<option${f.label===l?' selected':''}>${l}</option>`).join('')}</select><button class="del" data-pdel="${f.id}">Elimina</button></div>`).join('')}</div>`);
 }
-
 function orario(a){ const p=[]; if(a.oraInizio) p.push('inizio dalle '+a.oraInizio); if(a.oraFine) p.push('fine entro le '+a.oraFine); return p.join(' - '); }
 function listVal(v){return Array.isArray(v)?v.join(', '):(v||'');}
 function dl(pairs){return `<dl>${pairs.filter(p=>listVal(p[1])).map(([k,v])=>`<dt>${k}</dt><dd>${esc(listVal(v))}</dd>`).join('')}</dl>`;}
 function viewRiep(){
   const r=S.rec,a=r.anag,v=r.viso,c=r.colori,s=r.asp,p=r.prova,d=c.sub&&SD[c.sub];
   const steps=p.steps.filter(x=>x.note.trim());
-  return `<h1>${esc(fullName(r))}</h1><p class="lead" style="margin-bottom:18px"><b>Giorno della prova trucco:</b> ${esc(provaDay(r))}</p>
-  <div style="margin:0 0 20px;display:flex;align-items:center;gap:10px"><span class="muted">Stato</span>${stChip(r,1)}</div>
-  <div class="stack" id="pdfbox" style="margin-bottom:26px">${S.pdf&&S.pdf.id===r.id?pdfButtons():`<button class="btn" data-act="pdf">Genera PDF</button>`}</div>
-  <div class="sum">
-  <h3>Anagrafica</h3>${dl([['Tipo evento',a.occasione],['Email',a.email],['Telefono',a.tel],[a.occasione==='Sposa'?'Data nozze':'Data',a.dataEvento],['Luogo del trucco',a.luogo],['Orario',orario(a)],['Note',a.note]])}
-  <h3>Viso</h3>${dl([['Forma',v.forma&&FACES[v.forma].n],['Pelle',v.pelle],['Occhi',v.occhi],['Labbra',v.labbra],['Note',v.note]])}
-  <h3>Armocromia</h3>${dl([['Sottotono',c.sottotono],['Intensità',c.croma],['Profondità',c.profondita],['Capelli',c.capelli],['Occhi',c.occhiCol],['Stagione',c.sub&&subName(c.sub)],['Note',c.note]])}
-  ${d?palette([...d.occhi,...d.labbra,...d.blush]):''}
-  <h3>Aspettative</h3>${dl([['Stile',s.stili],['Finish',s.finish],['Occhi',s.occhi],['Labbra',s.labbra],['Resistenza',s.resa],['Riferimenti',s.rif],['Da evitare',s.evitare],['Allergie',s.allergie]])}
-  <h3>Prova trucco</h3>${steps.length?`<dl>${steps.map(x=>`<dt>${esc(x.nome)}</dt><dd>${esc(x.note)}</dd>`).join('')}</dl>`:''}${dl([['Note',p.note],['Per il giorno',p.giorno]])}
-  ${r.photos.length?`<div class="photos">${r.photos.map(f=>`<div class="ph"><img src="${f.data}" alt=""><div class="muted" style="margin-top:6px">${esc(f.label)}</div></div>`).join('')}</div>`:''}
-  </div>
-`;
+  const sec=(t,b)=>b.replace(/<dl><\/dl>/g,'').trim()?card(t,`<div class="sum">${b}</div>`):'';
+  return `<h1 class="stepT" style="margin-bottom:8px"><span class="hl">${esc(fullName(r))}</span></h1><p class="lead" style="margin-bottom:18px"><b>Giorno della prova trucco:</b> ${esc(provaDay(r))}</p>
+  <div style="margin:0 0 20px;display:flex;align-items:center;gap:10px"><span class="muted">Stato</span>${stChip(r,1)}</div>${tagsHtml(r)?`<div style="margin:-8px 0 18px">${tagsHtml(r)}</div>`:''}
+  <div class="stack" id="pdfbox" style="margin-bottom:8px">${S.pdf&&S.pdf.id===r.id?pdfButtons():`<button class="btn" data-act="pdf">Genera PDF</button>`}</div>`+
+  sec('Anagrafica',dl([['Tipo evento',a.occasione],['Email',a.email],['Telefono',a.tel],[a.occasione==='Sposa'?'Data nozze':'Data',a.dataEvento],['Luogo del trucco',a.luogo],['Orario',orario(a)],['Note',a.note]]))+
+  sec('Viso',dl([['Forma',v.forma&&FACES[v.forma].n],['Pelle',v.pelle],['Occhi',v.occhi],['Labbra',v.labbra],['Note',v.note]]))+
+  sec('Armocromia',dl([['Sottotono',c.sottotono],['Intensità',c.croma],['Profondità',c.profondita],['Capelli',c.capelli],['Occhi',c.occhiCol],['Stagione',c.sub&&subName(c.sub)],['Note',c.note]])+(d?palette([...d.occhi,...d.labbra,...d.blush]):''))+
+  sec('Aspettative',dl([['Stile',s.stili],['Finish',s.finish],['Occhi',s.occhi],['Labbra',s.labbra],['Resistenza',s.resa],['Riferimenti',s.rif],['Da evitare',s.evitare],['Allergie',s.allergie]]))+
+  sec('Prova trucco',(steps.length?`<dl>${steps.map(x=>`<dt>${esc(x.nome)}</dt><dd>${esc(x.note)}</dd>`).join('')}</dl>`:'')+dl([['Note',p.note],['Per il giorno',p.giorno]]))+
+  (r.photos.length?card('Foto',`<div class="photos" style="margin-top:0">${r.photos.map(f=>`<div class="ph"><img src="${f.data}" alt=""><div class="muted" style="margin-top:6px">${esc(f.label)}</div></div>`).join('')}</div>`):'');
 }
 function pdfButtons(){return `<div class="card"><b>PDF pronto</b><div class="stack" style="margin-top:12px"><button class="btn" data-act="share">Condividi / Salva PDF</button><a class="btn ghost" href="${S.pdf.url}" target="_blank" rel="noopener">Apri anteprima</a><button class="btn ghost" data-act="pdf">Rigenera (dopo modifiche)</button></div></div>`;}
 
@@ -678,16 +679,16 @@ function renderSheet(){
     h=`<h3>${esc(fullName(r))}</h3><p class="muted" style="margin-bottom:6px">In che stato è questa consulenza?</p>
     ${STATI.map(x=>`<button class="opt${stId(r)===x.id?' on':''}" data-setstato="${x.id}"><i class="sd" style="background:${x.c}"></i>${x.n}</button>`).join('')}
     <label class="f" style="margin-top:22px">Pagamenti</label>
-    <div class="chips"><button class="chip${r.pag&&r.pag.prova?' on':''}" data-pay="prova">Prova saldata</button><button class="chip${r.pag&&r.pag.saldo?' on':''}" data-pay="saldo">Saldo ricevuto</button></div>
+    <div class="chips"><button class="chip${r.pag&&r.pag.prova?' on':''}" data-pay="prova">Prova incassata</button><button class="chip${r.pag&&r.pag.saldo?' on':''}" data-pay="saldo">Saldo incassato</button></div>
     <button class="btn ghost" data-act="sheetclose" style="margin-top:24px">Chiudi</button>`;
   } else if(sh.type==='chiudi'){
-    h=`<h3>Prova eseguita?</h3><p class="lead" style="margin:6px 0 20px">Segno la scheda come <b>Prova eseguita, in attesa di conferma</b>?</p>
-    <div class="stack"><button class="btn" data-act="closeyes">Sì, prova eseguita</button><button class="btn ghost" data-act="closeno">No, chiudi e basta</button></div>`;
+    h=`<h3>La prova è stata eseguita?</h3><p class="lead" style="margin:6px 0 20px">La scheda passa a <b>Prova eseguita, in attesa di conferma</b>.</p>
+    <div class="stack"><button class="btn" data-act="closepaid">Sì, eseguita e incassata</button><button class="btn sage" data-act="closeunpaid">Sì, eseguita, da incassare</button><button class="btn ghost" data-act="closeno">No, chiudi e basta</button></div>`;
   } else if(sh.type==='nuovo'){
     h=`<h3>Nuovo appuntamento</h3><p class="muted">Bozza della scheda: il resto lo compili il giorno della prova.</p>
     ${nf('Nome','nome')}${nf('Cognome','cognome')}${nf('Cellulare','tel','tel')}${nf('Email','email','email')}
     <label class="f">Tipo di evento</label><div class="chips">${['Sposa','Cerimonia','Serata / evento','Servizio foto','Quotidiano','Altro'].map(o=>`<button class="chip${S.nuovo.occasione===o?' on':''}" data-nbchip="${esc(o)}">${o}</button>`).join('')}</div>
-    <div class="row" style="align-items:flex-end"><div class="grow" style="flex:1.4">${nf('Giorno della prova','dataProva','date')}</div><div class="grow">${nf('Ora','oraProva','time')}</div></div>
+    <div class="row" style="align-items:flex-start"><div class="grow" style="flex:1.15">${nf('Giorno della prova','dataProva','date')}</div><div class="grow">${nf('Ora','oraProva','time')}</div></div>
     ${nf('Data dell\'evento (se già nota)','dataEvento','date')}
     <div class="stack" style="margin-top:26px"><button class="btn" data-act="savenew">Salva appuntamento</button><button class="btn ghost" data-act="sheetclose">Annulla</button></div>`;
   }
@@ -734,7 +735,8 @@ document.addEventListener('click',async e=>{
     case 'savenew': saveNuovo(); break;
     case 'sheetclose': closeSheet(); break;
     case 'close': if(stId(S.rec)==='da-fare'){ S.sheet={type:'chiudi'}; renderSheet(); } else home(); break;
-    case 'closeyes': S.rec.stato='attesa'; await saveNow(); closeSheet(); home(); break;
+    case 'closepaid': S.rec.stato='attesa'; S.rec.pag=S.rec.pag||{}; S.rec.pag.prova=true; await saveNow(); closeSheet(); home(); break;
+    case 'closeunpaid': S.rec.stato='attesa'; S.rec.pag=S.rec.pag||{}; S.rec.pag.prova=false; await saveNow(); closeSheet(); home(); break;
     case 'closeno': closeSheet(); home(); break;
     case 'home': home(); break;
     case 'next': go(S.step+1); break;
@@ -803,11 +805,12 @@ async function buildPdf(r){
   doc.setTextColor(...CH); doc.setFont('times','normal'); doc.setFontSize(24); doc.text('MATÉA',M,y+4,{charSpace:2.4});
   doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...SAGE); doc.text('SKINCARE STUDIO  ·  CONSULENZA TRUCCO',M,y+10,{charSpace:.8});
   y+=17; doc.setDrawColor(...GOLD); doc.setLineWidth(.4); doc.line(M,y,W-M,y); y+=12;
-  doc.setTextColor(...CH); doc.setFont('times','normal'); doc.setFontSize(26); doc.text(lat(fullName(r)),M,y); y+=8;
+  doc.setTextColor(...CH); doc.setFont('times','bold'); doc.setFontSize(27); doc.text(lat(fullName(r)),M,y); y+=8;
   doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(...TAUPE);
   doc.text(lat('Giorno della prova trucco: '+provaDay(r)),M,y); y+=10;
 
-  const section=t=>{ ensure(22); y+=6; doc.setFont('times','normal'); doc.setFontSize(16); doc.setTextColor(...CH); doc.text(lat(t),M,y); y+=2.5; doc.setDrawColor(...GOLD); doc.setLineWidth(.35); doc.line(M,y,M+14,y); y+=6; };
+  const ttl=(x,yy,t)=>{ doc.setFont('times','bold'); doc.setFontSize(17); const w=doc.getTextWidth(lat(t)); doc.setFillColor(205,214,207); doc.rect(x-1,yy-1.4,w+2,3.4,'F'); doc.setTextColor(...CH); doc.text(lat(t),x,yy); };
+  const section=t=>{ ensure(22); y+=6; ttl(M,y,t); y+=8; };
   const kv=(k,val)=>{ val=listVal(val); if(!String(val).trim()) return;
     const lines=doc.splitTextToSize(lat(val),CW); ensure(8+lines.length*4.6);
     doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...TAUPE); doc.text(lat(k).toUpperCase(),M,y,{charSpace:.6}); y+=4.2;
@@ -820,7 +823,7 @@ async function buildPdf(r){
 
   /* ---------- PAGINA 1: anagrafica + viso (2 colonne), poi armocromia ---------- */
   const CWc=(CW-10)/2, X2=M+CWc+10, g3=(CW-16)/3;
-  const titleAt=(x,yy,t)=>{ doc.setFont('times','normal'); doc.setFontSize(16); doc.setTextColor(...CH); doc.text(lat(t),x,yy); doc.setDrawColor(...GOLD); doc.setLineWidth(.35); doc.line(x,yy+2.5,x+14,yy+2.5); return yy+9; };
+  const titleAt=(x,yy,t)=>{ ttl(x,yy,t); return yy+9; };
   const itemsAt=(x,w,yy,items)=>{ items.forEach(([k,val])=>{ val=listVal(val); if(!String(val).trim()) return;
     const L=doc.splitTextToSize(lat(val),w); doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...TAUPE); doc.text(lat(k).toUpperCase(),x,yy,{charSpace:.6}); yy+=4.2;
     doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(...CH); doc.text(L,x,yy); yy+=L.length*4.6+2.6; }); return yy; };
