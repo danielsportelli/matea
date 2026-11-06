@@ -45,6 +45,11 @@
   .linkbtn{ background:none; border:0; font:inherit; font-size:14px; font-weight:600; color:var(--charcoal); padding:10px 0; min-height:44px; cursor:pointer; }
   .progress{ height:2px; background:var(--beige); margin-top:8px; }
   .progress i{ display:block; height:100%; background:var(--gold); transition:width .3s; }
+  .stepper{ display:flex; align-items:center; margin-top:10px; }
+  .stepper .bar{ flex:1; height:1px; background:var(--beige); min-width:4px; }
+  .dot{ flex:0 0 auto; width:36px; height:36px; border-radius:50%; border:1px solid var(--taupe); background:#fff; color:var(--charcoal); font:600 14px 'Manrope',sans-serif; cursor:pointer; padding:0; }
+  .dot.done{ background:var(--tint-sage); border-color:var(--sage); }
+  .dot.cur{ background:var(--charcoal); border-color:var(--charcoal); color:#fff; }
   .steplabel{ font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--sage); font-weight:600; margin-top:10px; }
 
   main{ padding:30px var(--safe-x) 190px; }
@@ -392,7 +397,8 @@ function renderTop(){
   const t=$('#top');
   if(!S.rec){ t.innerHTML=`<div class="top-row"><span class="logo">MATÉA</span><span class="muted">Consulenza trucco</span></div>`; return; }
   t.innerHTML=`<div class="top-row"><button class="linkbtn" data-act="home">‹ Schede</button><span class="logo" style="font-size:18px">MATÉA</span><span class="muted" style="min-width:60px;text-align:right">${S.step+1}/${STEPS.length}</span></div>
-  <div class="progress"><i style="width:${((S.step+1)/STEPS.length)*100}%"></i></div><div class="steplabel">${STEPS[S.step].t}</div>`;
+  <div class="stepper">${STEPS.map((x,i)=>`<button class="dot${i===S.step?' cur':(i<=(S.rec.step||0)?' done':'')}" data-goto="${i}" aria-label="${x.t}">${i+1}</button>`).join('<span class="bar"></span>')}</div>
+  <div class="steplabel">Passo ${S.step+1} di ${STEPS.length} · ${STEPS[S.step].t}</div>`;
 }
 function renderNav(){
   const n=$('#nav'), i=$('#navin');
@@ -400,7 +406,7 @@ function renderNav(){
   n.hidden=false;
   const last=S.step===STEPS.length-1;
   i.innerHTML=(S.step>0?`<button class="btn ghost" data-act="prev">Indietro</button>`:`<button class="btn ghost" data-act="home">Schede</button>`)+
-    (last?`<button class="btn" data-act="pdf">Genera PDF</button>`:`<button class="btn" data-act="next">Avanti</button>`);
+    (last?`<button class="btn" data-act="home">Chiudi scheda</button>`:`<button class="btn" data-act="next">Avanti</button>`);
 }
 
 function viewHome(){
@@ -549,7 +555,8 @@ function dl(pairs){return `<dl>${pairs.filter(p=>listVal(p[1])).map(([k,v])=>`<d
 function viewRiep(){
   const r=S.rec,a=r.anag,v=r.viso,c=r.colori,s=r.asp,p=r.prova,d=c.sub&&SD[c.sub];
   const steps=p.steps.filter(x=>x.note.trim());
-  return `<h1>${esc(fullName(r))}</h1><p class="lead" style="margin-bottom:6px"><b>Giorno della prova trucco:</b> ${esc(provaDay(r))}</p>
+  return `<h1>${esc(fullName(r))}</h1><p class="lead" style="margin-bottom:18px"><b>Giorno della prova trucco:</b> ${esc(provaDay(r))}</p>
+  <div class="stack" id="pdfbox" style="margin-bottom:26px">${S.pdf&&S.pdf.id===r.id?pdfButtons():`<button class="btn" data-act="pdf">Genera PDF</button>`}</div>
   <div class="sum">
   <h3>Anagrafica</h3>${dl([['Tipo evento',a.occasione],['Email',a.email],['Telefono',a.tel],[a.occasione==='Sposa'?'Data nozze':'Data',a.dataEvento],['Luogo del trucco',a.luogo],['Orario',orario(a)],['Note',a.note]])}
   <h3>Viso</h3>${dl([['Forma',v.forma&&FACES[v.forma].n],['Pelle',v.pelle],['Occhi',v.occhi],['Labbra',v.labbra],['Note',v.note]])}
@@ -559,9 +566,9 @@ function viewRiep(){
   <h3>Prova trucco</h3>${steps.length?`<dl>${steps.map(x=>`<dt>${esc(x.nome)}</dt><dd>${esc(x.note)}</dd>`).join('')}</dl>`:''}${dl([['Note',p.note],['Per il giorno',p.giorno]])}
   ${r.photos.length?`<div class="photos">${r.photos.map(f=>`<div class="ph"><img src="${f.data}" alt=""><div class="muted" style="margin-top:6px">${esc(f.label)}</div></div>`).join('')}</div>`:''}
   </div>
-  <div class="stack" id="pdfbox" style="margin-top:30px">${S.pdf&&S.pdf.id===r.id?pdfButtons():''}</div>`;
+`;
 }
-function pdfButtons(){return `<div class="card"><b>PDF pronto</b><div class="stack" style="margin-top:12px"><button class="btn" data-act="share">Condividi / Salva PDF</button><a class="btn ghost" href="${S.pdf.url}" target="_blank" rel="noopener">Apri anteprima</a></div></div>`;}
+function pdfButtons(){return `<div class="card"><b>PDF pronto</b><div class="stack" style="margin-top:12px"><button class="btn" data-act="share">Condividi / Salva PDF</button><a class="btn ghost" href="${S.pdf.url}" target="_blank" rel="noopener">Apri anteprima</a><button class="btn ghost" data-act="pdf">Rigenera (dopo modifiche)</button></div></div>`;}
 
 function render(keepScroll){
   const y=window.scrollY;
