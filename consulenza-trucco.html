@@ -460,7 +460,7 @@ function dayHead(iso,month){
   if(!month){ if(d<0) return 'Passati'; if(d===0) return 'Oggi'; if(d===1) return 'Domani'; if(d<=7) return 'Questa settimana'; }
   const m=new Date(iso+'T12:00:00').toLocaleDateString('it-IT',{month:'long',year:'numeric'}); return m.charAt(0).toUpperCase()+m.slice(1);
 }
-function agendaDate(r){ return stId(r)==='confermato'?(r.anag.dataEvento||r.anag.dataProva||''):(r.anag.dataProva||''); }
+function agendaDate(r){ return (stId(r)==='confermato'||stId(r)==='concluso')?(r.anag.dataEvento||r.anag.dataProva||''):(r.anag.dataProva||''); }
 function agendaKey(r){ return (agendaDate(r)||'9999-99-99')+(stId(r)==='da-fare'?(r.anag.oraProva||'99:99'):''); }
 function agendaHtml(){
   const f=S.filtro; const cnt=id=>S.list.filter(r=>stId(r)===id).length;
@@ -484,8 +484,8 @@ function agendaHtml(){
   items.forEach(r=>{
     const iso=agendaDate(r), h=dayHead(iso,monthMode); if(h!==last){ body+=`<div class="dayhead">${h}</div>`; last=h; }
     const dd=iso?new Date(iso+'T12:00:00'):null;
-    const lab=stId(r)==='confermato'?'evento':'prova';
-    const when=iso?`<b>${dd.getDate()}</b><span>${dd.toLocaleDateString('it-IT',{month:'short'}).replace('.','')}</span><i>${lab}${stId(r)==='da-fare'&&r.anag.oraProva?' · '+esc(r.anag.oraProva):''}</i>`:`<b>–</b><span>senza data</span>`;
+    const ev=(stId(r)==='confermato'||stId(r)==='concluso')&&r.anag.dataEvento, lab=ev?'evento':'';
+    const when=iso?`<b>${dd.getDate()}</b><span>${dd.toLocaleDateString('it-IT',{month:'short'}).replace('.','')}</span><i>${[lab,stId(r)==='da-fare'&&r.anag.oraProva?esc(r.anag.oraProva):''].filter(Boolean).join(' · ')}</i>`:`<b>–</b><span>senza data</span>`;
     body+=`<div class="ag" data-open="${r.id}"><div class="agd">${when}</div><div class="grow"><div class="nm">${esc(fullName(r))}</div><div class="meta">${esc(r.anag.occasione||'Consulenza')}${r.anag.tel?' · '+esc(r.anag.tel):''}</div></div>${stChip(r)}</div>`;
   });
   if(!items.length) body=`<div class="empty" style="padding:26px 10px">${f==='da-fare'?'Nessuna prova da fare.':f==='tutti'?'Nessuna scheda.':'Nessuna scheda in questo stato.'}</div>`;
