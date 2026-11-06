@@ -417,11 +417,7 @@ function viewHome(){
   <button class="btn" data-act="new">+ Nuova consulenza</button>
   ${S.list.length>4?`<label class="f">Cerca</label><input type="text" id="search" placeholder="Nome o cognome" value="${esc(S.q)}">`:''}
   <h2 style="margin-top:34px">Schede salvate</h2>
-  ${l.length?l.map(r=>`<div class="client" data-open="${r.id}"><div class="grow"><div class="nm">${esc(fullName(r))}</div><div class="meta">${esc(r.anag.occasione||'Consulenza')} · prova ${esc(provaDay(r))}${r.photos&&r.photos.length?' · '+r.photos.length+' foto':''}</div></div><button class="x" data-del="${r.id}" aria-label="Elimina">×</button></div>`).join(''):`<div class="empty">Nessuna scheda ancora.</div>`}
-  <h2>Backup</h2>
-  <p class="hint">Esporta tutte le schede in un file (foto incluse) per non perderle se cambi telefono o cancelli i dati del browser.</p>
-  <div class="stack"><button class="btn ghost" data-act="export">Esporta backup</button>
-  <label class="btn ghost" style="cursor:pointer">Importa backup<input type="file" id="imp" accept="application/json,.json"></label></div>`;
+  ${l.length?l.map(r=>`<div class="client" data-open="${r.id}"><div class="grow"><div class="nm">${esc(fullName(r))}</div><div class="meta">${esc(r.anag.occasione||'Consulenza')} · prova ${esc(provaDay(r))}${r.photos&&r.photos.length?' · '+r.photos.length+' foto':''}</div></div><button class="x" data-del="${r.id}" aria-label="Elimina">×</button></div>`).join(''):`<div class="empty">Nessuna scheda ancora.</div>`}`;
 }
 
 function viewAnag(){
@@ -603,7 +599,6 @@ document.addEventListener('click',async e=>{
     case 'next': go(S.step+1); break;
     case 'prev': go(S.step-1); break;
     case 'addstep': S.rec.prova.steps.push({id:uid(),nome:'',note:''}); touch(); render(true); setTimeout(()=>{const i=document.querySelectorAll('.pstep input');i[i.length-1]&&i[i.length-1].focus();},50); break;
-    case 'export': exportAll(); break;
     case 'pdf': makePdf(t); break;
     case 'share': sharePdf(); break;
   }
@@ -619,7 +614,6 @@ document.addEventListener('change',async e=>{
   const t=e.target;
   if(t.dataset.plabel){ const f=S.rec.photos.find(x=>x.id===t.dataset.plabel); if(f){f.label=t.value; touch();} }
   else if(t.classList.contains('phin')){ const files=[...t.files]; t.value=''; if(!files.length) return; let ok=0; for(const f of files){ try{ S.rec.photos.push({id:uid(),label:'Prova',data:await shrink(f)}); ok++; }catch(_){ toast('Foto non leggibile (formato non supportato?)'); } } if(ok){ touch(); await saveNow(); render(true); toast(ok+(ok>1?' foto aggiunte':' foto aggiunta')); } }
-  else if(t.id==='imp'){ importAll(t.files[0]); t.value=''; }
 });
 
 /* ---------- foto: ridimensiona per risparmiare spazio ---------- */
@@ -633,18 +627,12 @@ function shrink(file,max=1600,q=.82){
   });
 }
 
-/* ---------- backup ---------- */
+/* ---------- salvataggio file (PDF) ---------- */
 async function shareOrSave(blob,name,title){
   try{ const dl=window.claude&&window.claude.use&&await window.claude.use('downloads'); if(dl){ await dl.save({filename:name,data:blob}); return; } }catch(e){ if(e&&e.code==='declined') return; }
   const file=new File([blob],name,{type:blob.type});
   if(navigator.canShare&&navigator.canShare({files:[file]})){ try{ await navigator.share({files:[file],title}); return; }catch(e){ if(e&&e.name==='AbortError') return; } }
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);
-}
-async function exportAll(){ const all=await dbAll(); await shareOrSave(new Blob([JSON.stringify({v:1,schede:all})],{type:'application/json'}),'matea-backup-'+new Date().toISOString().slice(0,10)+'.json','Backup Matéa'); }
-async function importAll(f){
-  if(!f) return;
-  try{ const j=JSON.parse(await f.text()); const a=j.schede||[]; for(const r of a){ if(r&&r.id) await dbPut(r); } S.list=await dbAll(); render(true); toast(a.length+' schede importate'); }
-  catch(_){ toast('File non valido'); }
 }
 
 /* ====================== PDF ====================== */
