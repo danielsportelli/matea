@@ -395,7 +395,7 @@ function area(label,path,ph){
 
 function renderTop(){
   const t=$('#top');
-  if(!S.rec){ t.innerHTML=`<div class="top-row"><span class="logo">MATÉA</span><span class="muted">Consulenza trucco</span></div>`; return; }
+  if(!S.rec){ t.innerHTML=`<div class="top-row"><span class="logo">MATÉA</span><span class="muted">Make up</span></div>`; return; }
   t.innerHTML=`<div class="top-row"><button class="linkbtn" data-act="home">‹ Schede</button><span class="logo" style="font-size:18px">MATÉA</span><span class="muted" style="min-width:60px;text-align:right">${S.step+1}/${STEPS.length}</span></div>
   <div class="stepper">${STEPS.map((x,i)=>`<button class="dot${i===S.step?' cur':(i<=(S.rec.step||0)?' done':'')}" data-goto="${i}" aria-label="${x.t}">${i+1}</button>`).join('<span class="bar"></span>')}</div>
   <div class="steplabel">Passo ${S.step+1} di ${STEPS.length} · ${STEPS[S.step].t}</div>`;
@@ -412,7 +412,7 @@ function renderNav(){
 function viewHome(){
   const q=S.q.trim().toLowerCase();
   const l=S.list.filter(r=>!q||fullName(r).toLowerCase().includes(q)).sort((a,b)=>b.updated-a.updated);
-  return `<span class="eyebrow">Uso interno</span><h1>Consulenza trucco</h1>
+  return `<h1>Consulenza e prova trucco</h1>
   <p class="lead">Scheda cliente, forma del viso, armocromia e prova trucco. I dati restano solo su questo dispositivo.</p>
   <button class="btn" data-act="new">+ Nuova consulenza</button>
   ${S.list.length>4?`<label class="f">Cerca</label><input type="text" id="search" placeholder="Nome o cognome" value="${esc(S.q)}">`:''}
