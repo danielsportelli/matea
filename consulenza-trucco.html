@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --warm-white:#F8F7F4;
@@ -163,7 +163,8 @@
   .toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:calc(var(--safe-bottom) + 90px); background:var(--charcoal); color:#fff; padding:12px 18px; border-radius:2px; font-size:14px; z-index:50; max-width:90%; }
   /* pannelli (card solo bordo) */
   .panel{ border:1px solid var(--beige); border-radius:2px; padding:22px 18px 8px; margin-top:28px; }
-  .panel > h2{ margin:0 0 14px; }
+  .panel > h2{ margin:0 0 16px; font-weight:700; font-size:32px; letter-spacing:.005em; }
+  .hl{ background:linear-gradient(transparent 56%, rgba(138,155,140,.42) 56%); padding:0 5px; margin:0 -5px; -webkit-box-decoration-break:clone; box-decoration-break:clone; }
   .panel .fchips{ margin:0 -18px; padding-left:18px; padding-right:18px; }
   .panel .dayhead:first-of-type{ margin-top:14px; }
   .panel .ag,.panel .client{ background:transparent; border:0; border-bottom:1px solid var(--beige); border-radius:0; margin:0; padding:14px 0; }
@@ -408,7 +409,7 @@ async function dbPut(r){const db=await openDb(); if(!db){mem.set(r.id,r);return;
 async function dbDel(id){const db=await openDb(); if(!db){mem.delete(id);return;} return req(db,'readwrite',s=>s.delete(id));}
 
 /* ====================== STATO ====================== */
-const S={rec:null,step:0,list:[],q:'',pdf:null,open:{},filtro:'attivi',sheet:null,nuovo:null};
+const S={rec:null,step:0,list:[],q:'',pdf:null,open:{},filtro:'da-fare',periodo:'',sheet:null,nuovo:null};
 let saveT=null;
 function touch(){ if(!S.rec) return; S.rec.updated=Date.now(); S.rec.step=Math.max(S.rec.step||0,S.step); clearTimeout(saveT); saveT=setTimeout(saveNow,350); }
 async function saveNow(){ clearTimeout(saveT); if(S.rec){ try{await dbPut(S.rec);}catch(e){toast('Salvataggio non riuscito (spazio esaurito?)');} } }
@@ -463,22 +464,32 @@ function agendaDate(r){ return stId(r)==='confermato'?(r.anag.dataEvento||r.anag
 function agendaKey(r){ return (agendaDate(r)||'9999-99-99')+(stId(r)==='da-fare'?(r.anag.oraProva||'99:99'):''); }
 function agendaHtml(){
   const f=S.filtro; const cnt=id=>S.list.filter(r=>stId(r)===id).length;
-  const nAct=S.list.filter(r=>ATTIVI.includes(stId(r))).length;
-  const opts=[{id:'attivi',s:'Attivi',c:null,n:nAct},...STATI.map(x=>({id:x.id,s:x.s,c:x.c,n:cnt(x.id)}))];
+  const opts=[...STATI.map(x=>({id:x.id,s:x.s,c:x.c,n:cnt(x.id)})),{id:'tutti',s:'Tutti',c:null,n:S.list.length}];
   const chipsH=`<div class="fchips">${opts.map(o=>`<button type="button" class="chip${f===o.id?' on':''}" data-filtro="${o.id}">${o.c?`<i class="sd" style="background:${o.c}"></i>`:''}${o.s}<span class="cnt">${o.n}</span></button>`).join('')}</div>`;
-  const items=S.list.filter(r=>f==='attivi'?ATTIVI.includes(stId(r)):stId(r)===f);
+  const months=[...new Set(S.list.map(r=>agendaDate(r).slice(0,7)).filter(Boolean))].sort();
+  if(S.periodo&&!months.includes(S.periodo)) S.periodo='';
+  const mlab=m=>dayHead(m+'-15',true);
+  const per=months.length?`<select id="periodo" aria-label="Periodo" style="margin:4px 0 2px"><option value="">Periodo: tutti</option>${months.map(m=>`<option value="${m}"${S.periodo===m?' selected':''}>${mlab(m)}</option>`).join('')}</select>`:'';
+  let items=S.list.filter(r=>f==='tutti'||stId(r)===f);
+  if(S.periodo) items=items.filter(r=>agendaDate(r).slice(0,7)===S.periodo);
+  const today=todayIso(), key=agendaKey;
   const desc=(f==='concluso'||f==='annullato');
-  items.sort((a,b)=>desc?agendaKey(b).localeCompare(agendaKey(a)):agendaKey(a).localeCompare(agendaKey(b)));
+  if(f==='tutti'&&!S.periodo){
+    const up=items.filter(r=>!agendaDate(r)||agendaDate(r)>=today).sort((a,b)=>key(a).localeCompare(key(b)));
+    const pa=items.filter(r=>agendaDate(r)&&agendaDate(r)<today).sort((a,b)=>key(b).localeCompare(key(a)));
+    items=up.concat(pa);
+  } else items.sort((a,b)=>desc?key(b).localeCompare(key(a)):key(a).localeCompare(key(b)));
+  const monthMode=desc||!!S.periodo;
   let last='',body='';
   items.forEach(r=>{
-    const iso=agendaDate(r), h=dayHead(iso,desc); if(h!==last){ body+=`<div class="dayhead">${h}</div>`; last=h; }
+    const iso=agendaDate(r), h=dayHead(iso,monthMode); if(h!==last){ body+=`<div class="dayhead">${h}</div>`; last=h; }
     const dd=iso?new Date(iso+'T12:00:00'):null;
     const lab=stId(r)==='confermato'?'evento':'prova';
     const when=iso?`<b>${dd.getDate()}</b><span>${dd.toLocaleDateString('it-IT',{month:'short'}).replace('.','')}</span><i>${lab}${stId(r)==='da-fare'&&r.anag.oraProva?' · '+esc(r.anag.oraProva):''}</i>`:`<b>–</b><span>senza data</span>`;
     body+=`<div class="ag" data-open="${r.id}"><div class="agd">${when}</div><div class="grow"><div class="nm">${esc(fullName(r))}</div><div class="meta">${esc(r.anag.occasione||'Consulenza')}${r.anag.tel?' · '+esc(r.anag.tel):''}</div></div>${stChip(r)}</div>`;
   });
-  if(!items.length) body=`<div class="empty" style="padding:26px 10px">${f==='attivi'?'Nessun appuntamento in programma.':'Nessuna scheda in questo stato.'}</div>`;
-  return chipsH+body;
+  if(!items.length) body=`<div class="empty" style="padding:26px 10px">${f==='da-fare'?'Nessuna prova da fare.':f==='tutti'?'Nessuna scheda.':'Nessuna scheda in questo stato.'}</div>`;
+  return chipsH+per+body;
 }
 const norm=x=>String(x||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 function homeList(){
@@ -486,7 +497,7 @@ function homeList(){
   const all=[...S.list].sort((a,b)=>b.updated-a.updated);
   const l=q?all.filter(r=>norm([r.anag.nome,r.anag.cognome,r.anag.nome+' '+r.anag.cognome,r.anag.cognome+' '+r.anag.nome,r.anag.email,r.anag.tel].join(' ')).includes(q)||(qd.length>=3&&String(r.anag.tel||'').replace(/\D/g,'').includes(qd))):all.slice(0,5);
   const card=r=>`<div class="client" data-open="${r.id}"><div class="grow"><div class="nm">${esc(fullName(r))}</div><div class="meta">${esc(r.anag.occasione||'Consulenza')} · prova ${esc(provaDay(r))}${r.anag.tel?' · '+esc(r.anag.tel):''}${r.photos&&r.photos.length?' · '+r.photos.length+' foto':''}</div></div>${stChip(r)}</div>`;
-  return `<div class="muted" style="margin:0 0 12px">${q?(l.length+(l.length===1?' risultato':' risultati')):'Le ultime '+Math.min(5,all.length)+' consulenze'}</div>`+
+  return `<div class="muted" style="margin:0 0 12px">${q?(l.length+(l.length===1?' risultato':' risultati')):(all.length===0?'':all.length===1?'L\'ultima consulenza':'Le ultime '+Math.min(5,all.length)+' consulenze')}</div>`+
     (l.length?l.map(card).join(''):`<div class="empty">${q?'Nessuna scheda trovata.':'Nessuna scheda ancora.'}</div>`);
 }
 function viewHome(){
@@ -494,8 +505,8 @@ function viewHome(){
   <p class="lead">Agenda delle prove e schede delle clienti.</p>
   <button class="btn" data-act="newappt">+ Nuovo appuntamento</button>
   <button class="linkact" data-act="new">oppure inizia subito una consulenza</button>
-  <section class="panel"><h2>Agenda</h2><div id="agenda">${agendaHtml()}</div></section>
-  <section class="panel"><h2>Schede salvate</h2>
+  <section class="panel"><h2><span class="hl">Agenda</span></h2><div id="agenda">${agendaHtml()}</div></section>
+  <section class="panel"><h2><span class="hl">Schede salvate</span></h2>
   <input type="search" id="search" placeholder="Nome, cognome, email o cellulare" value="${esc(S.q)}" autocomplete="off" autocapitalize="off" enterkeyhint="search">
   <div id="clist" style="margin-top:16px">${homeList()}</div></section>`;
 }
@@ -743,7 +754,8 @@ document.addEventListener('input',e=>{
 });
 document.addEventListener('change',async e=>{
   const t=e.target;
-  if(t.dataset.plabel){ const f=S.rec.photos.find(x=>x.id===t.dataset.plabel); if(f){f.label=t.value; touch();} }
+  if(t.id==='periodo'){ S.periodo=t.value; $('#agenda').innerHTML=agendaHtml(); }
+  else if(t.dataset.plabel){ const f=S.rec.photos.find(x=>x.id===t.dataset.plabel); if(f){f.label=t.value; touch();} }
   else if(t.classList.contains('phin')){ const files=[...t.files]; t.value=''; if(!files.length) return; let ok=0; for(const f of files){ try{ S.rec.photos.push({id:uid(),label:'Prova',data:await shrink(f)}); ok++; }catch(_){ toast('Foto non leggibile (formato non supportato?)'); } } if(ok){ touch(); await saveNow(); render(true); toast(ok+(ok>1?' foto aggiunte':' foto aggiunta')); } }
 });
 
