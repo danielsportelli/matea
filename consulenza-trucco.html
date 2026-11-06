@@ -62,7 +62,7 @@
 
   /* form */
   label.f{ display:block; font-size:12px; letter-spacing:.12em; text-transform:uppercase; font-weight:600; color:#6b6b6b; margin:20px 0 8px; }
-  input[type=text],input[type=email],input[type=tel],input[type=date],input[type=time],textarea,select{
+  input[type=text],input[type=email],input[type=tel],input[type=date],input[type=time],input[type=search],textarea,select{
     width:100%; padding:14px 14px; border:1px solid var(--beige); border-radius:2px; background:#fff;
     font-family:'Manrope',sans-serif; font-size:16px; /* 16px: evita lo zoom automatico su iOS */ color:var(--charcoal);
     -webkit-appearance:none; appearance:none;
@@ -109,6 +109,7 @@
   .client{ display:flex; align-items:center; gap:12px; padding:16px; background:#fff; border:1px solid var(--beige); border-radius:2px; margin-bottom:10px; cursor:pointer; }
   .client .nm{ font-family:'Cormorant Garamond',serif; font-size:22px; line-height:1.15; }
   .client .meta{ font-size:12px; color:#7a7a7a; margin-top:2px; }
+  .client .chev{ font-size:26px; color:var(--taupe); padding:0 6px; }
   .client .x{ background:none; border:0; font-size:22px; color:var(--taupe); min-width:44px; min-height:44px; cursor:pointer; }
   .empty{ text-align:center; padding:40px 10px; color:#7a7a7a; font-family:'Cormorant Garamond',serif; font-style:italic; font-size:22px; }
 
@@ -409,15 +410,22 @@ function renderNav(){
     (last?`<button class="btn" data-act="home">Chiudi scheda</button>`:`<button class="btn" data-act="next">Avanti</button>`);
 }
 
+const norm=x=>String(x||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+function homeList(){
+  const q=norm(S.q).trim(), qd=q.replace(/\D/g,'');
+  const all=[...S.list].sort((a,b)=>b.updated-a.updated);
+  const l=q?all.filter(r=>norm([r.anag.nome,r.anag.cognome,r.anag.nome+' '+r.anag.cognome,r.anag.cognome+' '+r.anag.nome,r.anag.email,r.anag.tel].join(' ')).includes(q)||(qd.length>=3&&String(r.anag.tel||'').replace(/\D/g,'').includes(qd))):all.slice(0,5);
+  const card=r=>`<div class="client" data-open="${r.id}"><div class="grow"><div class="nm">${esc(fullName(r))}</div><div class="meta">${esc(r.anag.occasione||'Consulenza')} · prova ${esc(provaDay(r))}${r.anag.tel?' · '+esc(r.anag.tel):''}${r.photos&&r.photos.length?' · '+r.photos.length+' foto':''}</div></div><span class="chev">›</span></div>`;
+  return `<div class="muted" style="margin:0 0 12px">${q?(l.length+(l.length===1?' risultato':' risultati')):'Le ultime '+Math.min(5,all.length)+' consulenze'}</div>`+
+    (l.length?l.map(card).join(''):`<div class="empty">${q?'Nessuna scheda trovata.':'Nessuna scheda ancora.'}</div>`);
+}
 function viewHome(){
-  const q=S.q.trim().toLowerCase();
-  const l=S.list.filter(r=>!q||fullName(r).toLowerCase().includes(q)).sort((a,b)=>b.updated-a.updated);
   return `<span class="eyebrow">Primo incontro</span><h1>Consulenza e prova trucco</h1>
   <p class="lead">Scheda cliente, forma del viso, armocromia e prova trucco. I dati restano solo su questo dispositivo.</p>
   <button class="btn" data-act="new">+ Nuova consulenza</button>
-  ${S.list.length>4?`<label class="f">Cerca</label><input type="text" id="search" placeholder="Nome o cognome" value="${esc(S.q)}">`:''}
   <h2 style="margin-top:34px">Schede salvate</h2>
-  ${l.length?l.map(r=>`<div class="client" data-open="${r.id}"><div class="grow"><div class="nm">${esc(fullName(r))}</div><div class="meta">${esc(r.anag.occasione||'Consulenza')} · prova ${esc(provaDay(r))}${r.photos&&r.photos.length?' · '+r.photos.length+' foto':''}</div></div><button class="x" data-del="${r.id}" aria-label="Elimina">×</button></div>`).join(''):`<div class="empty">Nessuna scheda ancora.</div>`}`;
+  <input type="search" id="search" placeholder="Nome, cognome, email o cellulare" value="${esc(S.q)}" autocomplete="off" autocapitalize="off" enterkeyhint="search">
+  <div id="clist" style="margin-top:16px">${homeList()}</div>`;
 }
 
 function viewAnag(){
@@ -579,7 +587,7 @@ async function go(step){ await saveNow(); S.step=Math.max(0,Math.min(STEPS.lengt
 async function home(){ await saveNow(); S.rec=null; S.list=await dbAll(); render(); }
 
 document.addEventListener('click',async e=>{
-  const t=e.target.closest('[data-chip],[data-act],[data-open],[data-del],[data-sdel],[data-pdel],[data-goto]'); if(!t) return;
+  const t=e.target.closest('[data-chip],[data-act],[data-open],[data-sdel],[data-pdel],[data-goto]'); if(!t) return;
   if(t.dataset.chip){
     const path=t.dataset.chip,val=t.dataset.val;
     if(t.hasAttribute('data-multi')){ const a=getp(S.rec,path)||[]; const i=a.indexOf(val); i>=0?a.splice(i,1):a.push(val); setp(S.rec,path,a); }
@@ -588,7 +596,6 @@ document.addEventListener('click',async e=>{
     touch(); render(true); return;
   }
   if(t.dataset.open){ S.rec=S.list.find(r=>r.id===t.dataset.open); S.step=Math.min(S.rec.step||0,STEPS.length-1); render(); return; }
-  if(t.dataset.del){ e.stopPropagation(); const r=S.list.find(x=>x.id===t.dataset.del); if(confirm('Eliminare la scheda di '+fullName(r)+'? L\'operazione non si può annullare.')){ await dbDel(r.id); S.list=await dbAll(); render(true);} return; }
   if(t.dataset.goto){ go(+t.dataset.goto); return; }
   if(t.dataset.sdel){ S.rec.prova.steps=S.rec.prova.steps.filter(s=>s.id!==t.dataset.sdel); touch(); render(true); return; }
   if(t.dataset.pdel){ S.rec.photos=S.rec.photos.filter(f=>f.id!==t.dataset.pdel); touch(); render(true); return; }
@@ -607,7 +614,7 @@ document.addEventListener('input',e=>{
   const t=e.target;
   if(t.dataset.bind){ setp(S.rec,t.dataset.bind,t.value); touch(); }
   else if(t.dataset.step){ const s=S.rec.prova.steps.find(x=>x.id===t.dataset.step); if(s){ s[t.dataset.k]=t.value; touch(); } }
-  else if(t.id==='search'){ S.q=t.value; const p=t.selectionStart; render(true); const n=$('#search'); if(n){n.focus(); n.setSelectionRange(p,p);} }
+  else if(t.id==='search'){ S.q=t.value; $('#clist').innerHTML=homeList(); }
 });
 document.addEventListener('change',async e=>{
   const t=e.target;
