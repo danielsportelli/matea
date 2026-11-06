@@ -178,7 +178,6 @@
   .panel .ag,.panel .client{ background:transparent; border:0; border-bottom:1px solid var(--beige); border-radius:0; margin:0; padding:14px 0; }
   .panel .ag:last-child,.panel .client:last-child{ border-bottom:0; }
   .panel .empty{ padding:22px 10px 26px; }
-  .linkact{ display:block; width:100%; background:none; border:0; font:600 14px 'Manrope',sans-serif; color:var(--charcoal); text-decoration:underline; text-underline-offset:4px; padding:14px 0 4px; min-height:44px; cursor:pointer; text-align:center; }
   /* agenda / stati */
   .fchips{ display:flex; gap:8px; overflow-x:auto; padding:2px 0 8px; margin:0 calc(var(--safe-x) * -1); padding-left:var(--safe-x); padding-right:var(--safe-x); -webkit-overflow-scrolling:touch; scrollbar-width:none; }
   .fchips::-webkit-scrollbar{ display:none; }
@@ -516,10 +515,10 @@ function homeList(){
     (l.length?l.map(card).join(''):`<div class="empty">${q?'Nessuna scheda trovata.':'Nessuna scheda ancora.'}</div>`);
 }
 function viewHome(){
-  return `<span class="eyebrow">Primo incontro</span><h1 class="big">Consulenza e prova trucco</h1>
-  <p class="lead">Agenda delle prove e schede delle clienti.</p>
-  <button class="btn" data-act="newappt">+ Nuovo appuntamento</button>
-  <button class="linkact" data-act="new">oppure inizia subito una consulenza</button>
+  return `<section class="panel form" style="margin-top:6px"><span class="eyebrow">Nuova cliente</span>
+  <h2><span class="hl">Crea scheda</span></h2>
+  <p class="lead" style="margin-bottom:20px">Inserisci i primi dati e fissa la prova trucco: il resto si compila durante l'incontro.</p>
+  <button class="btn" data-act="newappt">+ Aggiungi scheda</button></section>
   <section class="panel"><h2><span class="hl">Agenda</span></h2><div id="agenda">${agendaHtml()}</div></section>
   <section class="panel"><h2><span class="hl">Schede salvate</span></h2>
   <input type="search" id="search" placeholder="Nome, cognome, email o cellulare" value="${esc(S.q)}" autocomplete="off" autocapitalize="off" enterkeyhint="search">
@@ -676,35 +675,39 @@ function renderSheet(){
   let h='';
   if(sh.type==='stato'){
     const r=recById(sh.id); if(!r){S.sheet=null;return renderSheet();}
-    h=`<h3>${esc(fullName(r))}</h3><p class="muted" style="margin-bottom:6px">In che stato è questa consulenza?</p>
-    ${STATI.map(x=>`<button class="opt${stId(r)===x.id?' on':''}" data-setstato="${x.id}"><i class="sd" style="background:${x.c}"></i>${x.n}</button>`).join('')}
+    const d=sh.draft, dirty=statoDirty();
+    h=`<h3>${esc(fullName(r))}</h3><p class="muted" style="margin-bottom:6px">Stato e pagamenti di questa scheda.</p>
+    <label class="f" style="margin-top:14px">Stato</label>
+    ${STATI.map(x=>`<button class="opt${d.stato===x.id?' on':''}" data-setstato="${x.id}"><i class="sd" style="background:${x.c}"></i>${x.n}</button>`).join('')}
     <label class="f" style="margin-top:22px">Pagamenti</label>
-    <div class="chips"><button class="chip${r.pag&&r.pag.prova?' on':''}" data-pay="prova">Prova incassata</button><button class="chip${r.pag&&r.pag.saldo?' on':''}" data-pay="saldo">Saldo incassato</button></div>
-    <button class="btn ghost" data-act="sheetclose" style="margin-top:24px">Chiudi</button>`;
+    <div class="chips"><button class="chip${d.prova?' on':''}" data-pay="prova">Prova incassata</button><button class="chip${d.saldo?' on':''}" data-pay="saldo">Saldo incassato</button></div>
+    <div class="stack" style="margin-top:26px">${dirty?'<button class="btn" data-act="savestato">Salva</button><button class="btn ghost" data-act="sheetclose">Annulla</button>':'<button class="btn ghost" data-act="sheetclose">Chiudi</button>'}</div>`;
   } else if(sh.type==='chiudi'){
     h=`<h3>La prova è stata eseguita?</h3><p class="lead" style="margin:6px 0 20px">La scheda passa a <b>Prova eseguita, in attesa di conferma</b>.</p>
     <div class="stack"><button class="btn" data-act="closepaid">Sì, eseguita e incassata</button><button class="btn sage" data-act="closeunpaid">Sì, eseguita, da incassare</button><button class="btn ghost" data-act="closeno">No, chiudi e basta</button></div>`;
   } else if(sh.type==='nuovo'){
-    h=`<h3>Nuovo appuntamento</h3><p class="muted">Bozza della scheda: il resto lo compili il giorno della prova.</p>
+    h=`<h3>Nuova scheda</h3><p class="muted">Bozza della scheda: il resto lo compili durante l'incontro.</p>
     ${nf('Nome','nome')}${nf('Cognome','cognome')}${nf('Cellulare','tel','tel')}${nf('Email','email','email')}
     <label class="f">Tipo di evento</label><div class="chips">${['Sposa','Cerimonia','Serata / evento','Servizio foto','Quotidiano','Altro'].map(o=>`<button class="chip${S.nuovo.occasione===o?' on':''}" data-nbchip="${esc(o)}">${o}</button>`).join('')}</div>
     <div class="row" style="align-items:flex-start"><div class="grow" style="flex:1.15">${nf('Giorno della prova','dataProva','date')}</div><div class="grow">${nf('Ora','oraProva','time')}</div></div>
     ${nf('Data dell\'evento (se già nota)','dataEvento','date')}
-    <div class="stack" style="margin-top:26px"><button class="btn" data-act="savenew">Salva appuntamento</button><button class="btn ghost" data-act="sheetclose">Annulla</button></div>`;
+    <div class="stack" style="margin-top:26px"><button class="btn" data-act="savenew">Salva scheda</button><button class="btn sage" data-act="savenewgo">Salva e inizia ora</button><button class="btn ghost" data-act="sheetclose">Annulla</button></div>`;
   }
   const keep=el.querySelector('.sheet'); const top=keep?keep.scrollTop:0;
-  el.innerHTML=`<div class="ov" data-act="sheetclose"></div><div class="sheet" role="dialog" aria-modal="true">${h}</div>`;
+  el.innerHTML=`<div class="ov" data-act="overlay"></div><div class="sheet" role="dialog" aria-modal="true">${h}</div>`;
   const ns=el.querySelector('.sheet'); if(ns) ns.scrollTop=top;
 }
+function statoDirty(){ const sh=S.sheet; if(!sh||sh.type!=='stato') return false; const r=recById(sh.id), p=(r&&r.pag)||{}; return sh.draft.stato!==stId(r)||!!sh.draft.prova!==!!p.prova||!!sh.draft.saldo!==!!p.saldo; }
 function closeSheet(){ S.sheet=null; renderSheet(); }
-async function saveNuovo(){
+async function saveNuovo(go){
   const n=S.nuovo;
   if(!n.nome.trim()&&!n.cognome.trim()){ toast('Inserisci almeno nome o cognome'); return; }
-  if(!n.dataProva){ toast('Inserisci il giorno della prova'); return; }
+  if(!n.dataProva){ if(go) n.dataProva=todayIso(); else { toast('Inserisci il giorno della prova'); return; } }
   const r=newRec();
   Object.assign(r.anag,{nome:n.nome.trim(),cognome:n.cognome.trim(),tel:n.tel.trim(),email:n.email.trim(),occasione:n.occasione,dataProva:n.dataProva,oraProva:n.oraProva,dataEvento:n.dataEvento});
   r.stato='da-fare'; r.step=0;
-  await dbPut(r); S.list=await dbAll(); closeSheet(); render(true); toast('Appuntamento salvato');
+  await dbPut(r); S.list=await dbAll(); closeSheet();
+  if(go){ S.rec=S.list.find(x=>x.id===r.id)||r; S.step=0; render(); } else { render(true); toast('Scheda salvata'); }
 }
 
 /* ====================== AZIONI ====================== */
@@ -714,9 +717,9 @@ async function home(){ await saveNow(); S.rec=null; S.list=await dbAll(); render
 document.addEventListener('click',async e=>{
   const t=e.target.closest('[data-chip],[data-act],[data-open],[data-sdel],[data-pdel],[data-goto],[data-state],[data-setstato],[data-pay],[data-nbchip],[data-filtro]'); if(!t) return;
   if(t.dataset.filtro){ S.filtro=t.dataset.filtro; $('#agenda').innerHTML=agendaHtml(); return; }
-  if(t.dataset.state){ e.stopPropagation(); S.sheet={type:'stato',id:t.dataset.state}; renderSheet(); return; }
-  if(t.dataset.setstato){ const r=recById(S.sheet.id); r.stato=t.dataset.setstato; r.updated=Date.now(); await dbPut(r); S.sheet=null; renderSheet(); render(true); return; }
-  if(t.dataset.pay){ const r=recById(S.sheet.id); r.pag=r.pag||{}; r.pag[t.dataset.pay]=!r.pag[t.dataset.pay]; r.updated=Date.now(); await dbPut(r); renderSheet(); return; }
+  if(t.dataset.state){ e.stopPropagation(); const r=recById(t.dataset.state), p=r.pag||{}; S.sheet={type:'stato',id:r.id,draft:{stato:stId(r),prova:!!p.prova,saldo:!!p.saldo}}; renderSheet(); return; }
+  if(t.dataset.setstato){ S.sheet.draft.stato=t.dataset.setstato; renderSheet(); return; }
+  if(t.dataset.pay){ S.sheet.draft[t.dataset.pay]=!S.sheet.draft[t.dataset.pay]; renderSheet(); return; }
   if(t.dataset.nbchip){ S.nuovo.occasione=S.nuovo.occasione===t.dataset.nbchip?'':t.dataset.nbchip; renderSheet(); return; }
   if(t.dataset.chip){
     const path=t.dataset.chip,val=t.dataset.val;
@@ -732,8 +735,11 @@ document.addEventListener('click',async e=>{
   switch(t.dataset.act){
     case 'new': S.rec=newRec(); S.step=0; await saveNow(); render(); break;
     case 'newappt': S.nuovo={nome:'',cognome:'',tel:'',email:'',occasione:'',dataProva:'',oraProva:'',dataEvento:''}; S.sheet={type:'nuovo'}; renderSheet(); break;
-    case 'savenew': saveNuovo(); break;
+    case 'savenew': saveNuovo(false); break;
+    case 'savenewgo': saveNuovo(true); break;
     case 'sheetclose': closeSheet(); break;
+    case 'overlay': if(S.sheet&&S.sheet.type==='stato'&&statoDirty()) toast('Modifiche non salvate: usa Salva o Annulla'); else closeSheet(); break;
+    case 'savestato': { const sh=S.sheet, r=recById(sh.id); r.stato=sh.draft.stato; r.pag=Object.assign({},r.pag,{prova:!!sh.draft.prova,saldo:!!sh.draft.saldo}); r.updated=Date.now(); await dbPut(r); closeSheet(); render(true); toast('Salvato'); break; }
     case 'close': if(stId(S.rec)==='da-fare'){ S.sheet={type:'chiudi'}; renderSheet(); } else home(); break;
     case 'closepaid': S.rec.stato='attesa'; S.rec.pag=S.rec.pag||{}; S.rec.pag.prova=true; await saveNow(); closeSheet(); home(); break;
     case 'closeunpaid': S.rec.stato='attesa'; S.rec.pag=S.rec.pag||{}; S.rec.pag.prova=false; await saveNow(); closeSheet(); home(); break;
