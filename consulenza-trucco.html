@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Consulenza trucco — Matéa</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#F8F7F4">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --warm-white:#F8F7F4;
+    --beige:#E8DFD2;
+    --taupe:#B9AA9B;
+    --charcoal:#2B2B2B;
+    --sage:#8A9B8C;
+    --gold:#C9B37E;
+    --tint-sage:#EEF1EA;
+    /* safe area generose: iPhone (notch / dynamic island / home bar) e Android (gesture bar) */
+    --safe-top:calc(env(safe-area-inset-top, 0px) + 22px);
+    --safe-bottom:calc(env(safe-area-inset-bottom, 0px) + 30px);
+    --safe-x:max(22px, env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  html{ -webkit-text-size-adjust:100%; }
+  body{
+    background:var(--warm-white); color:var(--charcoal);
+    font-family:'Manrope', sans-serif; font-size:16px; line-height:1.55;
+    -webkit-font-smoothing:antialiased; min-height:100vh; min-height:100dvh;
+  }
+  h1,h2,h3{ font-family:'Cormorant Garamond', serif; font-weight:400; letter-spacing:0.01em; }
+  .app{ max-width:560px; margin:0 auto; }
+
+  /* header */
+  .top{
+    position:sticky; top:0; z-index:20; background:rgba(248,247,244,.96);
+    -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+    padding:var(--safe-top) var(--safe-x) 12px; border-bottom:1px solid var(--beige);
+  }
+  .top-row{ display:flex; align-items:center; justify-content:space-between; min-height:44px; }
+  .logo{ font-family:'Cormorant Garamond', serif; font-size:22px; letter-spacing:.24em; font-weight:500; }
+  .linkbtn{ background:none; border:0; font:inherit; font-size:14px; font-weight:600; color:var(--charcoal); padding:10px 0; min-height:44px; cursor:pointer; }
+  .progress{ height:2px; background:var(--beige); margin-top:8px; }
+  .progress i{ display:block; height:100%; background:var(--gold); transition:width .3s; }
+  .stepper{ display:flex; align-items:center; margin-top:10px; }
+  .stepper .bar{ flex:1; height:1px; background:var(--beige); min-width:4px; }
+  .dot{ flex:0 0 auto; width:36px; height:36px; border-radius:50%; border:1px solid var(--taupe); background:#fff; color:var(--charcoal); font:600 14px 'Manrope',sans-serif; cursor:pointer; padding:0; }
+  .dot.done{ background:var(--tint-sage); border-color:var(--sage); }
+  .dot.cur{ background:var(--charcoal); border-color:var(--charcoal); color:#fff; }
+  .steplabel{ font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--sage); font-weight:600; margin-top:10px; }
+
+  main{ padding:30px var(--safe-x) 190px; }
+  h1{ font-size:clamp(32px,9vw,40px); line-height:1.12; margin-bottom:10px; }
+  h2{ font-size:26px; margin:34px 0 12px; line-height:1.2; }
+  h3{ font-size:20px; margin-bottom:6px; }
+  .lead{ color:#5b5b5b; margin-bottom:26px; font-size:15px; }
+  .eyebrow{ font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--sage); font-weight:600; display:block; margin-bottom:8px; }
+  .hint{ font-size:13px; color:#7a7a7a; margin:-4px 0 12px; }
+
+  /* form */
+  label.f{ display:block; font-size:12px; letter-spacing:.12em; text-transform:uppercase; font-weight:600; color:#6b6b6b; margin:20px 0 8px; }
+  input[type=text],input[type=email],input[type=tel],input[type=date],input[type=time],input[type=search],textarea,select{
+    width:100%; padding:14px 14px; border:1px solid var(--beige); border-radius:2px; background:#fff;
+    font-family:'Manrope',sans-serif; font-size:16px; /* 16px: evita lo zoom automatico su iOS */ color:var(--charcoal);
+    -webkit-appearance:none; appearance:none;
+  }
+  textarea{ min-height:96px; resize:vertical; line-height:1.5; }
+  select{ background-image:linear-gradient(45deg,transparent 50%,var(--taupe) 50%),linear-gradient(135deg,var(--taupe) 50%,transparent 50%); background-position:calc(100% - 20px) 55%,calc(100% - 14px) 55%; background-size:6px 6px,6px 6px; background-repeat:no-repeat; padding-right:36px; }
+  input:focus,textarea:focus,select:focus{ outline:none; border-color:var(--gold); box-shadow:0 0 0 3px rgba(201,179,126,.25); }
+
+  .chips{ display:flex; flex-wrap:wrap; gap:8px; }
+  .chip{
+    font-family:'Manrope',sans-serif; font-size:14px; font-weight:500; padding:11px 15px; min-height:44px;
+    background:#fff; border:1px solid var(--beige); border-radius:2px; color:var(--charcoal); cursor:pointer; text-align:left;
+  }
+  .chip.on{ background:var(--charcoal); border-color:var(--charcoal); color:#fff; }
+
+  .btn{
+    display:block; width:100%; text-align:center; font-family:'Manrope',sans-serif; font-weight:600; font-size:15px;
+    padding:16px 20px; min-height:52px; background:var(--charcoal); color:#fff; border:1px solid var(--charcoal);
+    border-radius:2px; cursor:pointer; letter-spacing:.02em; text-decoration:none;
+  }
+  .btn.ghost{ background:transparent; color:var(--charcoal); }
+  .btn.sage{ background:var(--sage); border-color:var(--sage); }
+  .btn.sm{ padding:10px 14px; min-height:44px; font-size:14px; width:auto; display:inline-block; }
+  .btn[disabled]{ opacity:.5; }
+  .stack > * + *{ margin-top:12px; }
+
+  .card{ background:#fff; border:1px solid var(--beige); border-radius:2px; padding:18px; }
+  .card + .card{ margin-top:12px; }
+  .row{ display:flex; gap:10px; align-items:center; }
+  .grow{ flex:1; }
+  .muted{ color:#7a7a7a; font-size:13px; }
+
+  /* bottom nav */
+  .nav{
+    position:fixed; left:0; right:0; bottom:0; z-index:30; background:rgba(248,247,244,.97);
+    -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+    border-top:1px solid var(--beige); padding:14px var(--safe-x) var(--safe-bottom);
+  }
+  .nav-in{ max-width:560px; margin:0 auto; display:flex; gap:10px; }
+  .nav .btn{ width:auto; flex:1; }
+  .nav .btn.ghost{ flex:0 0 38%; }
+
+  /* lista clienti */
+  .client{ display:flex; align-items:center; gap:12px; padding:16px; background:#fff; border:1px solid var(--beige); border-radius:2px; margin-bottom:10px; cursor:pointer; }
+  .client .nm{ font-family:'Cormorant Garamond',serif; font-size:22px; line-height:1.15; }
+  .client .meta{ font-size:12px; color:#7a7a7a; margin-top:2px; }
+  .client .chev{ font-size:26px; color:var(--taupe); padding:0 6px; }
+  .client .x{ background:none; border:0; font-size:22px; color:var(--taupe); min-width:44px; min-height:44px; cursor:pointer; }
+  .empty{ text-align:center; padding:40px 10px; color:#7a7a7a; font-family:'Cormorant Garamond',serif; font-style:italic; font-size:22px; }
+
+  /* forma viso */
+  .faces{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .face{ background:#fff; border:1px solid var(--beige); border-radius:2px; padding:12px 8px 12px; text-align:center; cursor:pointer; font-family:'Manrope',sans-serif; color:var(--charcoal); }
+  .face svg{ width:72%; max-width:130px; height:auto; display:block; margin:0 auto 6px; }
+  .face .fn{ font-size:14px; font-weight:600; }
+  .face.on{ border-color:var(--gold); box-shadow:0 0 0 2px var(--gold) inset; background:#FBF8F0; }
+  .shapeinfo{ border-left:2px solid var(--gold); padding:4px 0 4px 16px; margin:18px 0 6px; font-size:15px; }
+  .shapeinfo b{ font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:500; display:block; }
+
+  /* armocromia */
+  .season{ background:var(--tint-sage); border-radius:2px; padding:16px 18px; margin:18px 0 6px; }
+  .season b{ font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:500; display:block; line-height:1.15; }
+  .subs{ display:grid; gap:10px; margin-top:12px; }
+  .sub{ text-align:left; background:#fff; border:1px solid var(--beige); border-radius:2px; padding:14px 16px; cursor:pointer; font-family:'Manrope',sans-serif; color:var(--charcoal); }
+  .sub.on{ border-color:var(--gold); box-shadow:0 0 0 2px var(--gold) inset; background:#FBF8F0; }
+  .sub b{ font-family:'Cormorant Garamond',serif; font-size:21px; font-weight:500; display:block; }
+  .sub span{ font-size:13px; color:#6b6b6b; }
+  .tag{ display:inline-block; font-size:10px; letter-spacing:.14em; text-transform:uppercase; font-weight:700; color:var(--sage); margin-left:6px; }
+  .pal{ display:flex; flex-wrap:wrap; gap:12px 10px; margin:6px 0 14px; }
+  .sw{ width:calc(25% - 8px); min-width:64px; text-align:center; font-size:11px; line-height:1.25; color:#555; }
+  .sw i{ display:block; height:44px; border-radius:50%; width:44px; margin:0 auto 5px; border:1px solid rgba(0,0,0,.08); }
+
+  /* guida */
+  .diagram{ background:#fff; border:1px solid var(--beige); padding:14px; text-align:center; }
+  .diagram svg{ width:62%; max-width:260px; height:auto; }
+  .legend{ display:flex; gap:14px; justify-content:center; flex-wrap:wrap; font-size:12px; color:#555; margin-top:8px; }
+  .legend i{ display:inline-block; width:12px; height:12px; border-radius:50%; margin-right:6px; vertical-align:-2px; }
+  .guide dt{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; font-weight:700; color:var(--sage); margin-top:16px; }
+  .guide dd{ font-size:15px; margin-top:3px; }
+
+  /* prova */
+  .pstep{ background:#fff; border:1px solid var(--beige); border-radius:2px; padding:14px; margin-bottom:12px; }
+  .pstep .head{ display:flex; gap:8px; align-items:center; }
+  .pstep .head input{ font-family:'Cormorant Garamond',serif; font-size:22px; padding:8px 4px; border:0; border-bottom:1px solid var(--beige); background:transparent; border-radius:0; }
+  .pstep .num{ font-family:'Cormorant Garamond',serif; color:var(--taupe); font-size:20px; min-width:26px; }
+  .pstep textarea{ margin-top:8px; min-height:72px; }
+  .photos{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px; }
+  .ph{ background:#fff; border:1px solid var(--beige); padding:8px; }
+  .ph img{ width:100%; aspect-ratio:3/4; object-fit:cover; display:block; }
+  .ph select{ margin-top:8px; padding:10px 28px 10px 10px; font-size:15px; }
+  .ph .del{ width:100%; margin-top:6px; background:none; border:0; color:#a05050; font:inherit; font-size:13px; min-height:40px; cursor:pointer; }
+
+  /* riepilogo */
+  .sum h3{ margin-top:22px; padding-bottom:4px; border-bottom:1px solid var(--gold); display:inline-block; }
+  .sum dl{ margin-top:8px; }
+  .sum dt{ font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:#8a8a8a; font-weight:600; margin-top:10px; }
+  .sum dd{ font-size:15px; white-space:pre-wrap; }
+  .toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:calc(var(--safe-bottom) + 90px); background:var(--charcoal); color:#fff; padding:12px 18px; border-radius:2px; font-size:14px; z-index:50; max-width:90%; }
+  /* pannelli (card solo bordo) */
+  .panel{ border:1px solid var(--beige); border-radius:2px; padding:22px 18px 8px; margin-top:28px; }
+  .panel > h2{ margin:0 0 16px; font-weight:700; font-size:26px; line-height:1.15; letter-spacing:.005em; }
+  .panel.form{ padding-bottom:22px; margin-top:18px; }
+  .panel.form > h2 + label.f, .panel.form > h2 + p.hint{ margin-top:0; }
+  h1.stepT{ font-weight:500; font-size:clamp(38px,11.5vw,46px); line-height:1.06; letter-spacing:-.005em; margin-bottom:12px; }
+  .rule{ display:block; width:46px; height:2px; background:var(--gold); margin:0 0 18px; }
+  h1.big{ font-weight:700; }
+  .panel .pstep{ background:transparent; border:0; border-bottom:1px solid var(--beige); border-radius:0; padding:12px 0; margin:0; }
+  .panel .pstep:last-of-type{ border-bottom:0; }
+  .ptag{ display:inline-block; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; background:#F5EDD6; color:#6a5a25; margin:7px 6px 0 0; }
+  .ptag.ok{ background:var(--tint-sage); color:#4f5f52; }
+  .hl{ background:linear-gradient(transparent 56%, rgba(138,155,140,.42) 56%); padding:0 5px; margin:0 -5px; -webkit-box-decoration-break:clone; box-decoration-break:clone; }
+  .panel .fchips{ margin:0 -18px; padding-left:18px; padding-right:18px; }
+  .panel .dayhead:first-of-type{ margin-top:14px; }
+  .panel .ag,.panel .client{ background:transparent; border:0; border-bottom:1px solid var(--beige); border-radius:0; margin:0; padding:14px 0; }
+  .panel .ag:last-child,.panel .client:last-child{ border-bottom:0; }
+  .panel .empty{ padding:22px 10px 26px; }
+  /* agenda / stati */
+  .fchips{ display:flex; gap:8px; overflow-x:auto; padding:2px 0 8px; margin:0 calc(var(--safe-x) * -1); padding-left:var(--safe-x); padding-right:var(--safe-x); -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+  .fchips::-webkit-scrollbar{ display:none; }
+  .fchips .chip{ white-space:nowrap; flex:0 0 auto; }
+  .sd{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:7px; vertical-align:0; flex:0 0 auto; }
+  .chip .cnt{ opacity:.55; margin-left:6px; font-weight:600; }
+  .dayhead{ font-size:11px; letter-spacing:.16em; text-transform:uppercase; font-weight:700; color:var(--sage); margin:22px 0 8px; }
+  .ag{ display:flex; align-items:center; gap:14px; padding:14px; background:#fff; border:1px solid var(--beige); border-radius:2px; margin-bottom:10px; cursor:pointer; }
+  .agd{ flex:0 0 54px; text-align:center; line-height:1.05; }
+  .agd b{ display:block; font-family:'Cormorant Garamond',serif; font-size:30px; font-weight:500; }
+  .agd span{ display:block; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#7a7a7a; font-weight:600; margin-top:2px; }
+  .agd i{ display:block; font-style:normal; font-size:11px; color:var(--sage); margin-top:3px; font-weight:600; }
+  .ag .nm,.client .nm{ font-family:'Cormorant Garamond',serif; font-size:22px; line-height:1.15; }
+  .ag .meta{ font-size:12px; color:#7a7a7a; margin-top:2px; }
+  .st{ display:inline-flex; align-items:center; background:#fff; border:1px solid var(--beige); border-radius:20px; padding:8px 12px; min-height:40px; font:600 12px 'Manrope',sans-serif; color:var(--charcoal); cursor:pointer; white-space:nowrap; }
+  .st.big{ font-size:14px; padding:10px 16px; min-height:44px; }
+  .seg{ display:flex; border:1px solid var(--beige); border-radius:2px; overflow:hidden; background:#fff; }
+  .seg button{ flex:1; min-height:48px; border:0; background:transparent; font:600 14px 'Manrope',sans-serif; color:var(--charcoal); cursor:pointer; padding:0 8px; }
+  .seg button + button{ border-left:1px solid var(--beige); }
+  .seg button.on{ background:var(--charcoal); color:#fff; }
+  .seg button.on.warn{ background:#B8923E; }
+  .seg button.on.ok{ background:var(--sage); }
+  .phase{ border:1px solid var(--beige); border-radius:2px; padding:16px; margin-top:14px; background:#fff; }
+  .phase.locked{ opacity:.55; }
+  .phase .ph-h{ display:flex; align-items:center; gap:12px; }
+  .phase .ph-n{ flex:0 0 30px; height:30px; border-radius:50%; background:var(--charcoal); color:#fff; font:600 14px 'Manrope',sans-serif; display:flex; align-items:center; justify-content:center; }
+  .phase.locked .ph-n{ background:var(--taupe); }
+  .phase .ph-h b{ font-family:'Cormorant Garamond',serif; font-size:24px; font-weight:700; line-height:1.1; }
+  .phase .f2{ display:block; font-size:11px; letter-spacing:.14em; text-transform:uppercase; font-weight:700; color:#7a7a7a; margin:16px 0 8px; }
+  .phase .note{ font-size:13px; color:#7a7a7a; margin-top:10px; }
+  .dayhead.red{ color:#B5483F; }
+  .panel .ag.alert, .ag.alert{ flex-wrap:wrap; background:#FCF1EF; border:1px solid #E2B6AF; border-radius:2px; padding:14px; margin:0 0 10px; box-shadow:inset 4px 0 0 #B5483F; }
+  .stline{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-top:9px; }
+  .stline .st{ min-height:34px; padding:6px 12px; }
+  .stline .ptag{ margin:0; padding:5px 10px; }
+  .alertbar{ flex:0 0 100%; }
+  .alertmsg{ font-size:13px; font-weight:600; color:#9a3b32; margin-top:2px; }
+  .qa{ display:flex; gap:8px; margin-top:10px; }
+  .qa .btn.sm{ flex:1; padding:10px 8px; }
+  .alert-n{ display:inline-block; min-width:20px; height:20px; line-height:20px; border-radius:10px; background:#B5483F; color:#fff; font-size:11px; font-weight:700; text-align:center; margin-left:6px; padding:0 5px; }
+  .later{ display:flex; justify-content:space-between; align-items:center; gap:10px; width:100%; background:transparent; border:1px dashed var(--taupe); border-radius:2px; padding:14px; min-height:50px; margin:20px 0 6px; font:600 14px 'Manrope',sans-serif; color:var(--charcoal); cursor:pointer; text-align:left; }
+  .later span{ font-size:20px; font-weight:400; }
+  .ov{ position:fixed; inset:0; background:rgba(43,43,43,.42); z-index:60; }
+  .sheet{ position:fixed; left:0; right:0; bottom:0; z-index:61; max-width:560px; margin:0 auto; background:var(--warm-white); border-radius:12px 12px 0 0; padding:24px var(--safe-x) var(--safe-bottom); max-height:90vh; max-height:90dvh; overflow-y:auto; box-shadow:0 -10px 40px rgba(0,0,0,.18); }
+  .sheet h3{ font-size:26px; margin-bottom:4px; }
+  .opt{ display:flex; align-items:center; width:100%; text-align:left; background:#fff; border:1px solid var(--beige); border-radius:2px; padding:15px 16px; min-height:52px; margin-top:8px; font:500 15px 'Manrope',sans-serif; color:var(--charcoal); cursor:pointer; }
+  .opt.on{ border-color:var(--gold); box-shadow:0 0 0 2px var(--gold) inset; background:#FBF8F0; }
+  input[type=file]{ position:absolute; width:1px; height:1px; opacity:0; overflow:hidden; pointer-events:none; }
+  input[type=time],input[type=date]{ min-height:50px; min-width:0; max-width:100%; }
+  .row > .grow{ min-width:0; }
+  details.how{ background:var(--tint-sage); border-radius:2px; margin:0 0 14px; }
+  details.how summary{ list-style:none; cursor:pointer; padding:13px 16px; min-height:44px; font-size:14px; font-weight:600; color:#4f5f52; display:flex; justify-content:space-between; align-items:center; }
+  details.how summary::-webkit-details-marker{ display:none; }
+  details.how summary::after{ content:'+'; font-size:20px; font-weight:400; }
+  details.how[open] summary::after{ content:'–'; }
+  details.how .hb{ padding:0 16px 14px; font-size:14px; color:#3f3f3f; }
+  details.how .hb p{ margin-top:8px; }
+  details.how .hb ul{ margin:8px 0 0 18px; }
+  details.how .hb li{ margin-top:6px; }
+  details.how .hb b{ font-weight:600; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top" id="top"></header>
+  <main id="main"></main>
+</div>
+<nav class="nav" id="nav" hidden><div class="nav-in" id="navin"></div></nav>
+<div id="toast" class="toast" hidden></div>
+<div id="sheet"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+(function(){
+'use strict';
+
+/* ====================== DATI DI RIFERIMENTO ====================== */
+
+const STEPS=[
+  {id:'anag',t:'Anagrafica'},{id:'viso',t:'Forma del viso'},{id:'colori',t:'Colori'},
+  {id:'asp',t:'Aspettative'},{id:'guida',t:'Linee guida'},{id:'prova',t:'Prova trucco'},{id:'riepilogo',t:'Riepilogo'}
+];
+
+/* zone: [tipo, x, y, rx, ry, rotazione, specchiata?]   hl=luce, ct=contouring, bl=blush  (viewBox 100x124) */
+const FACES={
+  ovale:{n:'Ovale',
+    path:'M50 6 C74 6 84 30 84 56 C84 86 70 112 50 118 C30 112 16 86 16 56 C16 30 26 6 50 6Z',
+    d:'Lunghezza circa una volta e mezza la larghezza; fronte appena più larga del mento, linee morbide. Proporzioni equilibrate.',
+    z:[['hl',50,18,10,5,0],['hl',50,64,2.5,12,0],['hl',50,106,8,4,0],['hl',50,84,5,1.8,0],['hl',30,61,8,2.5,18,1],
+       ['ct',20,40,3.5,10,0,1],['ct',27,84,10,2.8,28,1],['bl',32,69,9,5,16,1]],
+    g:{obiettivo:'Mantenere le proporzioni naturali, senza correggere.',
+       contouring:'Leggero: ai lati della fronte e nell\'incavo sotto lo zigomo, ben sfumato.',
+       blush:'Sulle mele delle guance, sfumato verso le tempie.',
+       luce:'Centro fronte, setto nasale, sopra lo zigomo, arco di Cupido, centro del mento.',
+       extra:'Sopracciglio ad arco morbido. Il viso regge qualsiasi forma di labbra e occhi: si può osare sul look.'}},
+  rotondo:{n:'Rotondo',
+    path:'M50 10 C77 10 90 32 90 62 C90 92 74 114 50 114 C26 114 10 92 10 62 C10 32 23 10 50 10Z',
+    d:'Larghezza e lunghezza simili, guance piene, mento arrotondato, nessun angolo marcato.',
+    z:[['hl',50,21,9,6,0],['hl',50,64,2.5,13,0],['hl',50,101,7,5,0],['hl',29,60,8,2.5,25,1],
+       ['ct',15,62,3,26,0,1],['ct',27,90,11,3,35,1],['ct',50,111,9,2.5,0],['bl',30,67,10,5,35,1]],
+    g:{obiettivo:'Allungare otticamente il viso e dargli struttura.',
+       contouring:'Sui lati del viso dalla tempia alla mandibola, sotto lo zigomo in diagonale, sulla punta del mento.',
+       blush:'In diagonale verso le tempie. Mai tondo sulle mele: accentuerebbe la rotondità.',
+       luce:'Centro fronte, dorso del naso, centro del mento, sopra lo zigomo.',
+       extra:'Sopracciglio con arco leggermente alto e angolato. Occhi allungati verso l\'esterno.'}},
+  quadrato:{n:'Quadrato',
+    path:'M16 24 C16 12 30 8 50 8 C70 8 84 12 84 24 L86 84 L74 106 Q62 116 50 116 Q38 116 26 106 L14 84 Z',
+    d:'Fronte e mandibola larghe quasi quanto gli zigomi, angoli della mandibola marcati.',
+    z:[['hl',50,19,10,5,0],['hl',50,64,2.5,12,0],['hl',50,105,8,4,0],['hl',27,60,8,2.5,15,1],
+       ['ct',21,92,6,6,40,1],['ct',20,30,5,8,-20,1],['bl',33,70,9,6,10,1]],
+    g:{obiettivo:'Ammorbidire gli angoli di fronte e mandibola.',
+       contouring:'Sugli angoli della mandibola e ai lati della fronte, sfumando con movimenti circolari.',
+       blush:'Arrotondato sulle mele, senza linee nette.',
+       luce:'Centro fronte, centro del mento, zigomi alti.',
+       extra:'Sopracciglio curvo e morbido, niente linee dritte. Labbra con contorni morbidi.'}},
+  rettangolare:{n:'Rettangolare',
+    path:'M18 22 C18 10 32 6 50 6 C68 6 82 10 82 22 L82 94 C82 108 68 120 50 120 C32 120 18 108 18 94 Z',
+    d:'Viso lungo: fronte, zigomi e mandibola della stessa larghezza, mento squadrato o morbido.',
+    z:[['hl',28,62,10,2.5,0,1],['hl',50,66,2.5,10,0],['ct',50,9,22,3,0],['ct',50,116,12,3,0],['ct',22,50,3,12,0,1],['bl',32,69,12,4,0,1]],
+    g:{obiettivo:'Accorciare otticamente il viso e dargli larghezza.',
+       contouring:'Sull\'attaccatura dei capelli e sotto il mento, per ridurre la lunghezza.',
+       blush:'In orizzontale sulle guance (non in diagonale), per allargare.',
+       luce:'Zigomi in orizzontale. Evitare il centro della fronte e del mento.',
+       extra:'Sopracciglio dritto o poco arcuato. Labbra ben delineate per attirare l\'attenzione al centro.'}},
+  cuore:{n:'A cuore',
+    path:'M12 36 C12 14 30 8 50 8 C70 8 88 14 88 36 C88 62 72 94 50 118 C28 94 12 62 12 36Z',
+    d:'Fronte ampia, zigomi alti, mento stretto e appuntito.',
+    z:[['hl',50,104,8,5,0],['hl',50,64,2.5,12,0],['hl',30,56,8,2.5,15,1],['hl',30,92,5,3,45,1],
+       ['ct',22,26,6,10,-15,1],['ct',50,115,6,2.5,0],['bl',32,74,9,5,0,1]],
+    g:{obiettivo:'Ridurre l\'ampiezza della parte alta e dare volume in basso.',
+       contouring:'Ai lati della fronte/tempie e sulla punta del mento.',
+       blush:'Basso e morbido sulle guance, sfumato verso l\'orecchio.',
+       luce:'Centro del mento, ai lati della mandibola, zigomi.',
+       extra:'Sopracciglio ad arco morbido, non troppo alto. Labbro inferiore leggermente più pieno.'}},
+  triangolo:{n:'A pera (triangolo)',
+    path:'M30 10 C40 6 60 6 70 10 C80 14 82 30 84 52 C88 78 90 100 70 112 C62 117 38 117 30 112 C10 100 12 78 16 52 C18 30 20 14 30 10Z',
+    d:'Fronte stretta, mandibola più larga degli zigomi.',
+    z:[['hl',26,26,6,8,0,1],['hl',27,56,8,2.5,20,1],['hl',50,64,2.5,12,0],['hl',50,106,7,4,0],
+       ['ct',20,96,5,10,-20,1],['bl',30,62,10,4,20,1]],
+    g:{obiettivo:'Dare ampiezza alla parte alta e alleggerire la mandibola.',
+       contouring:'Ai lati della mandibola, sfumato verso l\'alto.',
+       blush:'Alto sugli zigomi, in direzione delle tempie.',
+       luce:'Tempie e lati della fronte, zigomi alti; poco sul mento.',
+       extra:'Più enfasi sugli occhi (ombretto, eyeliner) per portare l\'attenzione in alto. Sopracciglia ben definite.'}},
+  diamante:{n:'Diamante',
+    path:'M50 6 C64 6 72 16 74 30 C76 44 90 52 90 62 C90 76 70 100 50 118 C30 100 10 76 10 62 C10 52 24 44 26 30 C28 16 36 6 50 6Z',
+    d:'Zigomi larghi e prominenti; fronte e mento più stretti.',
+    z:[['hl',30,28,7,6,0,1],['hl',26,86,5,6,0,1],['hl',50,102,8,5,0],['hl',50,64,2.5,12,0],
+       ['ct',17,60,3,10,0,1],['ct',50,114,7,2.5,0],['bl',32,71,10,4,0,1]],
+    g:{obiettivo:'Addolcire gli zigomi e bilanciare fronte e mento.',
+       contouring:'Delicato, sotto il punto più largo dello zigomo; sulla punta del mento.',
+       blush:'In orizzontale sulle mele, senza portarlo verso le tempie.',
+       luce:'Ai lati della fronte e della mandibola, centro del mento.',
+       extra:'Sopracciglio ad arco morbido. Labbra piene per riequilibrare la parte bassa.'}}
+};
+const FACE_ORDER=['ovale','rotondo','quadrato','rettangolare','cuore','triangolo','diamante'];
+
+const ZC={hl:['#C9B37E',.62],ct:['#7d6657',.4],bl:['#D9847C',.5]};
+function faceSvg(k,zones,extra){
+  const f=FACES[k]; let z='';
+  if(zones){
+    z='<defs><filter id="blr" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2"/></filter></defs><g filter="url(#blr)">';
+    f.z.forEach(([t,x,y,rx,ry,r,s])=>{
+      const e=(cx,rot)=>`<ellipse cx="${cx}" cy="${y}" rx="${rx}" ry="${ry}" fill="${ZC[t][0]}" fill-opacity="${ZC[t][1]}" transform="rotate(${rot} ${cx} ${y})"/>`;
+      z+=e(x,r); if(s) z+=e(100-x,-r);
+    });
+    z+='</g>';
+  }
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 124" ${extra||''}>
+  <path d="${f.path}" fill="#FBFAF7" stroke="#2B2B2B" stroke-width="1.3" stroke-linejoin="round"/>${z}
+  <g fill="none" stroke="#B9AA9B" stroke-width=".9" stroke-linecap="round">
+    <path d="M29 54 Q36 49 43 54 Q36 57.5 29 54Z"/><path d="M57 54 Q64 49 71 54 Q64 57.5 57 54Z"/>
+    <path d="M50 62 L47 75 Q50 78 53 75"/><path d="M41 91 Q50 95 59 91 Q50 88 41 91Z"/>
+  </g></svg>`;
+}
+
+/* ---------- armocromia ---------- */
+const SUBS={
+  Primavera:[['light-spring','Primavera chiara'],['warm-spring','Primavera calda'],['bright-spring','Primavera brillante']],
+  Estate:[['light-summer','Estate chiara'],['cool-summer','Estate fredda'],['soft-summer','Estate morbida']],
+  Autunno:[['soft-autumn','Autunno morbido'],['warm-autumn','Autunno caldo'],['deep-autumn','Autunno profondo']],
+  Inverno:[['deep-winter','Inverno profondo'],['cool-winter','Inverno freddo'],['bright-winter','Inverno brillante']]
+};
+const SUGG={Primavera:{chiaro:0,medio:1,scuro:1},Estate:{chiaro:0,medio:1,scuro:2},Autunno:{chiaro:0,medio:1,scuro:2},Inverno:{chiaro:2,medio:1,scuro:0}};
+const SEASON_D={
+  Primavera:'Caldo e luminoso: colori freschi, vivaci e delicati con base dorata.',
+  Estate:'Freddo e morbido: colori sfumati, polverosi e rosati, mai troppo contrastati.',
+  Autunno:'Caldo e morbido: colori terrosi, speziati e avvolgenti.',
+  Inverno:'Freddo e contrastato: colori netti, intensi e puri.'
+};
+const P=s=>s.split(',').map(x=>{const [n,c]=x.trim().split(':');return [n,'#'+c];});
+const SD={
+ 'light-spring':{d:'Il carattere dominante è la luminosità: tratti chiari e delicati.',m:'Oro chiaro, champagne',
+   occhi:P('Pesca chiaro:F2C9A5,Verde acqua:A8D5BA,Champagne:E6CF9F'),labbra:P('Corallo tenue:F29E8E,Pesca rosato:F4B6A0,Albicocca:F0A57D'),blush:P('Pesca:F5B79D,Albicocca:F2A98B')},
+ 'warm-spring':{d:'Il carattere dominante è il calore: sottotono dorato deciso.',m:'Oro giallo',
+   occhi:P('Oro:D8B05A,Verde mela:A9B857,Bronzo chiaro:C48A4A'),labbra:P('Corallo:EE7B5E,Arancio rosato:E9805F,Salmone:F08C70'),blush:P('Corallo:EE8A68,Pesca caldo:F0A07A')},
+ 'bright-spring':{d:'Il carattere dominante è la brillantezza: contrasto vivo tra pelle, occhi e capelli.',m:'Oro lucido',
+   occhi:P('Turchese:2FB5A8,Verde brillante:5DBB63,Oro:E0B341'),labbra:P('Corallo vivo:F25C54,Rosso arancio:E8472F,Fucsia caldo:E8457A'),blush:P('Corallo vivo:F2705E,Pesca acceso:F59A74')},
+ 'light-summer':{d:'Il carattere dominante è la luminosità: tratti chiari con sottotono fresco.',m:'Argento, oro rosa',
+   occhi:P('Rosa antico chiaro:D9B3B8,Lavanda:BFB2D6,Grigio perla:C4C7CD'),labbra:P('Rosa tenue:E9A9B5,Malva chiaro:D49AAE,Rosa pesca fredda:EBB0B0'),blush:P('Rosa:EDADB5,Lampone chiaro:E69AAA')},
+ 'cool-summer':{d:'Il carattere dominante è il freddo: sottotono rosato o bluastro netto.',m:'Argento, platino',
+   occhi:P('Prugna fredda:8D6A86,Grigio azzurro:8E9FB2,Rosa cenere:B58E9A'),labbra:P('Rosa lampone:D0607F,Malva:B5708A,Rosa freddo:D98399'),blush:P('Rosa freddo:DE8FA5,Lampone:CF7392')},
+ 'soft-summer':{d:'Il carattere dominante è la morbidezza: pochi contrasti, tutto sfumato.',m:'Argento satinato, oro rosa',
+   occhi:P('Tortora rosato:A89A9B,Salvia grigia:9AA79B,Malva fumo:9C8591'),labbra:P('Rosa polvere:C48A94,Malva:A87584,Rosa tè:CE9D9E'),blush:P('Rosa polvere:D39A9F,Malva tenue:C58A99')},
+ 'soft-autumn':{d:'Il carattere dominante è la morbidezza: caldo ma attenuato, quasi neutro.',m:'Oro opaco, bronzo',
+   occhi:P('Oliva morbido:8F9161,Bronzo:B08A5C,Tortora caldo:A89280'),labbra:P('Pesca rosato:D58E7C,Mattone morbido:BB7260,Nude caldo:C99780'),blush:P('Pesca:DE9A80,Terracotta chiaro:CD8668')},
+ 'warm-autumn':{d:'Il carattere dominante è il calore: sottotono dorato intenso.',m:'Oro giallo, rame',
+   occhi:P('Rame:B8693A,Oliva:7C7B35,Oro antico:B8923E'),labbra:P('Terracotta:C2603F,Arancio bruciato:B8532E,Mattone:A5492F'),blush:P('Terracotta:CC7451,Zucca chiaro:D98A52')},
+ 'deep-autumn':{d:'Il carattere dominante è la profondità: tratti scuri con base calda.',m:'Oro scuro, bronzo',
+   occhi:P('Cioccolato:5A3A29,Verde bosco:3F5B3A,Bronzo scuro:8A5B2B'),labbra:P('Mattone scuro:8E3B2A,Vino caldo:7A2F2C,Ruggine:A04A2C'),blush:P('Ruggine:B5603F,Terracotta scuro:A9553A')},
+ 'deep-winter':{d:'Il carattere dominante è la profondità: tratti scuri con forte contrasto.',m:'Argento, oro bianco',
+   occhi:P('Prugna:4E2A4D,Nero fumo:2E2E34,Verde pino:1F4A3F'),labbra:P('Vino:7A1F3A,Bordeaux:641A33,Rosso ciliegia:A8142F'),blush:P('Bordeaux tenue:B04A64,Rosa scuro:A8445F')},
+ 'cool-winter':{d:'Il carattere dominante è il freddo: sottotono blu-rosato netto.',m:'Argento, platino',
+   occhi:P('Blu navy:263A66,Grigio acciaio:6A7482,Viola freddo:5A4A86'),labbra:P('Rosso blu:B3122F,Fucsia freddo:C0306F,Lampone scuro:A12857'),blush:P('Rosa freddo:D4607F,Lampone:C04A6E')},
+ 'bright-winter':{d:'Il carattere dominante è la brillantezza: contrasto altissimo, colori vividi.',m:'Argento lucido',
+   occhi:P('Blu elettrico:2447B8,Smeraldo:0E8A63,Viola vivo:6B3FA0'),labbra:P('Fucsia:D81B71,Rosso puro:D1122E,Magenta:B8176E'),blush:P('Fucsia tenue:E0507F,Rosa acceso:E4658F')}
+};
+function seasonOf(c){
+  if(!c.sottotono||!c.croma) return null;
+  const warm=/caldo/i.test(c.sottotono)&&!/freddo/i.test(c.sottotono)||c.sottotono==='Neutro caldo';
+  if(warm) return c.croma==='Brillante'?'Primavera':'Autunno';
+  return c.croma==='Brillante'?'Inverno':'Estate';
+}
+function subName(id){ for(const s in SUBS){const x=SUBS[s].find(a=>a[0]===id); if(x) return x[1];} return ''; }
+function seasonOfSub(id){ for(const s in SUBS){ if(SUBS[s].some(a=>a[0]===id)) return s; } return ''; }
+
+const PROVA_DEFAULT=['Preparazione della pelle','Primer','Correttore','Fondotinta','Contouring','Blush','Punto luce','Sopracciglia','Occhi','Ciglia / eyeliner','Labbra','Fissaggio'];
+
+/* ====================== UTIL ====================== */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+function getp(o,p){return p.split('.').reduce((a,k)=>a==null?a:a[k],o);}
+function setp(o,p,v){const k=p.split('.');const l=k.pop();let a=o;k.forEach(x=>{if(a[x]==null)a[x]={};a=a[x];});a[l]=v;}
+function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>t.hidden=true,2600);}
+function newRec(){
+  return {id:uid(),created:Date.now(),updated:Date.now(),step:0,
+    stato:'da-fare',pag:{},anag:{dataProva:todayIso()},viso:{occhi:[],labbra:[],pelle:[]},colori:{},asp:{stili:[],resa:[]},
+    prova:{steps:PROVA_DEFAULT.map(n=>({id:uid(),nome:n,note:''})),note:'',giorno:''},photos:[]};
+}
+function todayIso(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function fmtIso(i){return i?new Date(i+'T12:00:00').toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric'}):'';}
+function provaDay(r){return fmtIso(r.anag.dataProva)||fmtDate(r.created);}
+function fullName(r){return ((r.anag.nome||'')+' '+(r.anag.cognome||'')).trim()||'Cliente senza nome';}
+function fmtDate(t){return new Date(t).toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric'});}
+
+/* ====================== STORAGE (IndexedDB, solo sul dispositivo) ====================== */
+const mem=new Map(); let dbp=null, useMem=false;
+function openDb(){
+  if(dbp) return dbp;
+  dbp=new Promise((res,rej)=>{
+    try{
+      const r=indexedDB.open('matea-consulenze',1);
+      r.onupgradeneeded=()=>r.result.createObjectStore('schede',{keyPath:'id'});
+      r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error);
+    }catch(e){rej(e);}
+  }).catch(()=>{useMem=true;return null;});
+  return dbp;
+}
+function req(db,mode,fn){return new Promise((res,rej)=>{const t=db.transaction('schede',mode);const o=fn(t.objectStore('schede'));t.oncomplete=()=>res(o&&o.result);t.onerror=()=>rej(t.error);});}
+async function dbAll(){const db=await openDb(); if(!db) return [...mem.values()]; return req(db,'readonly',s=>s.getAll());}
+async function dbPut(r){const db=await openDb(); if(!db){mem.set(r.id,r);return;} return req(db,'readwrite',s=>s.put(r));}
+async function dbDel(id){const db=await openDb(); if(!db){mem.delete(id);return;} return req(db,'readwrite',s=>s.delete(id));}
+
+/* ====================== STATO ====================== */
+const S={rec:null,step:0,list:[],q:'',pdf:null,open:{},filtro:'calendario',periodo:'',piu:false,sheet:null,nuovo:null};
+let saveT=null;
+function touch(){ if(!S.rec) return; S.rec.updated=Date.now(); S.rec.step=Math.max(S.rec.step||0,S.step); clearTimeout(saveT); saveT=setTimeout(saveNow,350); }
+async function saveNow(){ clearTimeout(saveT); if(S.rec){ try{await dbPut(S.rec);}catch(e){toast('Salvataggio non riuscito (spazio esaurito?)');} } }
+
+/* ====================== RENDER ====================== */
+function chips(path,opts,multi){
+  const cur=getp(S.rec,path); const set=multi?(cur||[]):[cur];
+  return `<div class="chips">${opts.map(o=>`<button type="button" class="chip${set.includes(o)?' on':''}" data-chip="${path}" data-val="${esc(o)}"${multi?' data-multi':''}>${esc(o)}</button>`).join('')}</div>`;
+}
+function field(label,path,type,ph){
+  return `<label class="f">${label}</label><input type="${type||'text'}" data-bind="${path}" value="${esc(getp(S.rec,path)||'')}" placeholder="${esc(ph||'')}" autocomplete="off"${type==='tel'?' inputmode="tel"':''}${type==='email'?' inputmode="email" autocapitalize="off"':''}>`;
+}
+function area(label,path,ph){
+  return `<label class="f">${label}</label><textarea data-bind="${path}" placeholder="${esc(ph||'')}">${esc(getp(S.rec,path)||'')}</textarea>`;
+}
+
+function renderTop(){
+  const t=$('#top');
+  if(!S.rec){ t.innerHTML=`<div class="top-row"><span class="logo">MATÉA</span><span class="muted">Make up</span></div>`; return; }
+  t.innerHTML=`<div class="top-row"><button class="linkbtn" data-act="home">‹ Schede</button><span class="logo" style="font-size:18px">MATÉA</span><span class="muted" style="min-width:60px;text-align:right">${S.step+1}/${STEPS.length}</span></div>
+  <div class="stepper">${STEPS.map((x,i)=>`<button class="dot${i===S.step?' cur':(i<=(S.rec.step||0)?' done':'')}" data-goto="${i}" aria-label="${x.t}">${i+1}</button>`).join('<span class="bar"></span>')}</div>
+  <div class="steplabel">Passo ${S.step+1} di ${STEPS.length} · ${STEPS[S.step].t}</div>`;
+}
+function renderNav(){
+  const n=$('#nav'), i=$('#navin');
+  if(!S.rec){n.hidden=true;return;}
+  n.hidden=false;
+  const last=S.step===STEPS.length-1;
+  i.innerHTML=(S.step>0?`<button class="btn ghost" data-act="prev">Indietro</button>`:`<button class="btn ghost" data-act="home">Schede</button>`)+
+    (last?`<button class="btn" data-act="close">Salva e aggiorna agenda</button>`:`<button class="btn" data-act="next">Avanti</button>`);
+}
+
+const STATI=[
+  {id:'da-fare',s:'Prove da fare',l:'Prova da fare',n:'Prova da fare',c:'#C9B37E'},
+  {id:'attesa',s:'Attesa conferma',l:'Prova fatta · attesa conferma',n:'Prova fatta, da confermare',c:'#B9AA9B'},
+  {id:'confermato',s:'Confermati',l:'Trucco confermato',n:'Confermato, trucco da fare',c:'#8A9B8C'},
+  {id:'concluso',s:'Fatti',l:'Trucco fatto',n:'Trucco eseguito',c:'#2B2B2B'},
+  {id:'annullato',s:'Annullati',l:'Annullata',n:'Non confermato / annullato',c:'#C4A3A0'}];
+const ATTIVI=['da-fare','attesa','confermato'];
+const stId=r=>r.stato||'da-fare';
+function payTags(r){ const st=stId(r), p=r.pag||{}, t=[]; if(st==='annullato') return t;
+  if(['attesa','confermato','concluso'].includes(st)&&!p.prova) t.push('Prova da incassare');
+  if(st==='concluso'&&!p.saldo) t.push('Saldo da incassare'); return t; }
+const isClosed=r=>stId(r)==='concluso'&&r.pag&&r.pag.prova&&r.pag.saldo;
+function recheck(r){ const c=r.colori||{}; if(stId(r)!=='confermato'||!r.anag.dataEvento) return false; const d=daysFrom(r.anag.dataEvento); if(d<0||d>30) return false; return c.abb==='Leggera'||c.abb==='Intensa'||c.capCambio==='Cambierà'||c.sopr==='Più chiare'||c.sopr==='Più scure'; }
+const RECH='<span class="ptag" style="background:#E8EEE8;color:#3f5242" title="Ricontrolla i colori prima dell\'evento">↻ Ricontrolla colori</span>';
+const tagSpans=r=>payTags(r).map(x=>`<span class="ptag" title="${x}">€ ${x.startsWith('Prova')?'Prova':'Saldo'}</span>`).join('')+(isClosed(r)?'<span class="ptag ok">✓ Chiusa</span>':'')+(recheck(r)?RECH:'');
+const tagsHtml=r=>{ const t=payTags(r).map(x=>`<span class="ptag">€ ${x}</span>`).join(''); return (t||isClosed(r)||recheck(r))?`<div class="tags">${t}${isClosed(r)?'<span class="ptag ok">✓ Chiusa</span>':''}${recheck(r)?RECH:''}</div>`:''; };
+const stOf=r=>STATI.find(x=>x.id===stId(r))||STATI[0];
+const stChip=(r,big)=>`<button type="button" class="st${big?' big':''}" data-state="${r.id}"><i class="sd" style="background:${stOf(r).c}"></i>${stOf(r).l}</button>`;
+const recById=id=>(S.rec&&S.rec.id===id)?S.rec:S.list.find(r=>r.id===id);
+function daysFrom(iso){return Math.round((new Date(iso+'T12:00:00')-new Date(todayIso()+'T12:00:00'))/864e5);}
+function dayHead(iso,month){
+  if(!iso) return 'Senza data';
+  const d=daysFrom(iso);
+  if(!month){ if(d<0) return 'Passati'; if(d===0) return 'Oggi'; if(d===1) return 'Domani'; if(d<=7) return 'Questa settimana'; }
+  const m=new Date(iso+'T12:00:00').toLocaleDateString('it-IT',{month:'long',year:'numeric'}); return m.charAt(0).toUpperCase()+m.slice(1);
+}
+function agendaDate(r){ const st=stId(r); return st==='confermato'?(r.anag.dataEvento||''):st==='concluso'?(r.anag.dataEvento||r.anag.dataProva||''):(r.anag.dataProva||''); }
+function agendaKey(r){ const st=stId(r); return (agendaDate(r)||'9999-99-99')+(st==='da-fare'?(r.anag.oraProva||'99:99'):st==='confermato'?(r.anag.oraInizio||'99:99'):''); }
+function attention(r){
+  const st=stId(r), d=agendaDate(r), t=todayIso();
+  if(st==='da-fare'&&d&&d<t) return {kind:'prova',msg:'La prova del '+fmtIso(d)+' è passata: com\'è andata?'};
+  if(st==='confermato'&&!d) return {kind:'nodata',msg:'Manca la data del trucco definitivo.'};
+  if(st==='confermato'&&d<t) return {kind:'def',msg:'Il trucco del '+fmtIso(d)+' è passato: com\'è andato?'};
+  return null;
+}
+function agRow(r,lab){
+  const st=stId(r), iso=agendaDate(r), at=attention(r);
+  const dd=iso?new Date(iso+'T12:00:00'):null;
+  const tm=st==='da-fare'?r.anag.oraProva:st==='confermato'?r.anag.oraInizio:'';
+  const l=lab?(st==='da-fare'?'prova':st==='confermato'?'trucco':''):'';
+  const when=iso?`<b>${dd.getDate()}</b><span>${dd.toLocaleDateString('it-IT',{month:'short'}).replace('.','')}</span><i>${[l,tm?esc(tm):''].filter(Boolean).join(' · ')}</i>`:`<b>–</b><span>senza data</span>`;
+  const qa=at?`<div class="alertbar"><div class="alertmsg">${esc(at.msg)}</div><div class="qa">${at.kind!=='nodata'?`<button class="btn sm" data-qa="fatta" data-id="${r.id}">${at.kind==='def'?'Fatto':'Fatta'}</button>`:''}<button class="btn sm ghost" data-qa="sposta" data-id="${r.id}">${at.kind==='nodata'?'Imposta data':'Sposta'}</button><button class="btn sm ghost" data-qa="altro" data-id="${r.id}">Altro…</button></div></div>`:'';
+  return `<div class="ag${at?' alert':''}" data-open="${r.id}"><div class="agd">${when}</div><div class="grow"><div class="nm">${esc(fullName(r))}</div><div class="meta">${esc(r.anag.occasione||'Consulenza')}${r.anag.tel?' · '+esc(r.anag.tel):''}</div><div class="stline">${stChip(r)}${tagSpans(r)}</div></div>${qa}</div>`;
+}
+function agendaHtml(){
+  const f=S.filtro, today=todayIso();
+  const cal=S.list.filter(r=>['da-fare','confermato'].includes(stId(r)));
+  const nAlert=S.list.filter(r=>attention(r)).length;
+  const cnt=id=>S.list.filter(r=>stId(r)===id).length;
+  const nInc=S.list.filter(r=>payTags(r).length).length;
+  const opts=[{id:'calendario',s:'Calendario',c:'#C9B37E',n:cal.length,a:nAlert},{id:'attesa',s:'Attesa conferma',c:STATI[1].c,n:cnt('attesa')},{id:'concluso',s:'Fatti',c:STATI[3].c,n:cnt('concluso')},{id:'incasso',s:'Incassi',c:'#B8923E',n:nInc},{id:'annullato',s:'Annullati',c:STATI[4].c,n:cnt('annullato')},{id:'tutti',s:'Tutti',c:null,n:S.list.length}];
+  const chipsH=`<div class="fchips">${opts.map(o=>`<button type="button" class="chip${f===o.id?' on':''}" data-filtro="${o.id}">${o.c?`<i class="sd" style="background:${o.c}"></i>`:''}${o.s}<span class="cnt">${o.n}</span>${o.a?`<span class="alert-n">${o.a}</span>`:''}</button>`).join('')}</div>`;
+  const months=[...new Set(S.list.map(r=>agendaDate(r).slice(0,7)).filter(Boolean))].sort();
+  if(S.periodo&&!months.includes(S.periodo)) S.periodo='';
+  const per=months.length?`<select id="periodo" aria-label="Periodo" style="margin:4px 0 2px"><option value="">Periodo: tutti</option>${months.map(m=>`<option value="${m}"${S.periodo===m?' selected':''}>${dayHead(m+'-15',true)}</option>`).join('')}</select>`:'';
+  let items=S.list.filter(r=>f==='calendario'?['da-fare','confermato'].includes(stId(r)):f==='tutti'||(f==='incasso'?payTags(r).length>0:stId(r)===f));
+  if(S.periodo) items=items.filter(r=>agendaDate(r).slice(0,7)===S.periodo||(f==='calendario'&&attention(r)&&!agendaDate(r)));
+  const key=agendaKey, asc=(a,b)=>key(a).localeCompare(key(b)), desc=(a,b)=>key(b).localeCompare(key(a));
+  const group=(arr,month,lab)=>{ let last='',h=''; arr.forEach(r=>{ const hd=dayHead(agendaDate(r),month); if(hd!==last){ h+=`<div class="dayhead">${hd}</div>`; last=hd; } h+=agRow(r,lab); }); return h; };
+  let body='';
+  if(f==='calendario'){
+    items.sort(asc);
+    const over=items.filter(attention), ok=items.filter(r=>!attention(r));
+    if(over.length) body+=`<div class="dayhead red">Da aggiornare · ${over.length}</div>`+over.map(r=>agRow(r,true)).join('');
+    let near=ok, later=[];
+    if(!S.periodo){ near=ok.filter(r=>!agendaDate(r)||daysFrom(agendaDate(r))<=30); later=ok.filter(r=>agendaDate(r)&&daysFrom(agendaDate(r))>30); }
+    body+=group(near,!!S.periodo,true);
+    if(later.length){ const lastD=agendaDate(later[later.length-1]);
+      body+=`<button class="later" data-act="piu"><span style="font-size:14px;font-weight:600">Più avanti · ${later.length} ${later.length===1?'scheda':'schede'} · fino a ${dayHead(lastD,true).toLowerCase()}</span><span>${S.piu?'−':'+'}</span></button>`+(S.piu?group(later,true,true):''); }
+    if(!body) body=`<div class="empty" style="padding:26px 10px">Niente in calendario.</div>`;
+  } else {
+    if(f==='tutti'&&!S.periodo){
+      const up=items.filter(r=>!agendaDate(r)||agendaDate(r)>=today).sort(asc), pa=items.filter(r=>agendaDate(r)&&agendaDate(r)<today).sort(desc);
+      items=up.concat(pa);
+    } else items.sort((f==='concluso'||f==='annullato')?desc:asc);
+    const monthMode=(f==='concluso'||f==='annullato')||!!S.periodo;
+    body=group(items,monthMode,f==='tutti');
+    if(!items.length) body=`<div class="empty" style="padding:26px 10px">${f==='attesa'?'Nessuna scheda da confermare.':f==='incasso'?'Nessun incasso in sospeso.':f==='tutti'?'Nessuna scheda.':'Nessuna scheda in questo stato.'}</div>`;
+  }
+  return chipsH+per+body;
+}
+const norm=x=>String(x||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+function homeList(){
+  const q=norm(S.q).trim(), qd=q.replace(/\D/g,'');
+  const all=[...S.list].sort((a,b)=>b.updated-a.updated);
+  const l=q?all.filter(r=>norm([r.anag.nome,r.anag.cognome,r.anag.nome+' '+r.anag.cognome,r.anag.cognome+' '+r.anag.nome,r.anag.email,r.anag.tel].join(' ')).includes(q)||(qd.length>=3&&String(r.anag.tel||'').replace(/\D/g,'').includes(qd))):all.slice(0,5);
+  const card=r=>`<div class="client" data-open="${r.id}"><div class="grow"><div class="nm">${esc(fullName(r))}</div><div class="meta">${esc(r.anag.occasione||'Consulenza')} · prova ${esc(provaDay(r))}${r.anag.tel?' · '+esc(r.anag.tel):''}${r.photos&&r.photos.length?' · '+r.photos.length+' foto':''}</div><div class="stline">${stChip(r)}${tagSpans(r)}</div></div></div>`;
+  return `<div class="muted" style="margin:0 0 12px">${q?(l.length+(l.length===1?' risultato':' risultati')):(all.length===0?'':all.length===1?'L\'ultima consulenza':'Le ultime '+Math.min(5,all.length)+' consulenze')}</div>`+
+    (l.length?l.map(card).join(''):`<div class="empty">${q?'Nessuna scheda trovata.':'Nessuna scheda ancora.'}</div>`);
+}
+function viewHome(){
+  return `<section class="panel form" style="margin-top:6px"><span class="eyebrow">Nuova cliente</span>
+  <h2><span class="hl">Crea scheda</span></h2>
+  <p class="lead" style="margin-bottom:20px">Inserisci i primi dati e fissa la prova trucco: il resto si compila durante l'incontro.</p>
+  <button class="btn" data-act="newappt">+ Aggiungi scheda</button></section>
+  <section class="panel"><h2><span class="hl">Agenda</span></h2><div id="agenda">${agendaHtml()}</div></section>
+  <section class="panel"><h2><span class="hl">Schede salvate</span></h2>
+  <input type="search" id="search" placeholder="Nome, cognome, email o cellulare" value="${esc(S.q)}" autocomplete="off" autocapitalize="off" enterkeyhint="search">
+  <div id="clist" style="margin-top:16px">${homeList()}</div></section>`;
+}
+
+const H1=(t,lead)=>`<h1 class="stepT">${t}</h1><span class="rule"></span>${lead?`<p class="lead">${lead}</p>`:''}`;
+const card=(title,body,cls)=>`<section class="panel form${cls?' '+cls:''}"><h2><span class="hl">${title}</span></h2>${body}</section>`;
+function viewAnag(){
+  const a=S.rec.anag, sposa=a.occasione==='Sposa';
+  return H1('Chi è la cliente','Contatti, prova e dettagli dell\'evento.')+
+  card('Contatti',field('Nome','anag.nome','text')+field('Cognome','anag.cognome','text')+field('Email','anag.email','email')+field('Telefono','anag.tel','tel'))+
+  card('Foto della cliente',`<p class="hint" style="margin-top:0">Foto iniziale, a viso struccato e con luce naturale.</p>
+  <div class="stack"><label class="btn sage" style="cursor:pointer">Scatta una foto<input type="file" class="phin" data-label="Prima" accept="image/*" capture="environment"></label>
+  <label class="btn ghost" style="cursor:pointer">Scegli dalla galleria<input type="file" class="phin" data-label="Prima" accept="image/*" multiple></label></div>
+  ${S.rec.photos.filter(f=>f.label==='Prima').length?`<div class="photos">${S.rec.photos.filter(f=>f.label==='Prima').map(f=>`<div class="ph"><img src="${f.data}" alt=""><button class="del" data-pdel="${f.id}">Elimina</button></div>`).join('')}</div>`:''}`)+
+  card('Prova trucco',`<div class="row" style="align-items:flex-start"><div class="grow" style="flex:1.15">${field('Giorno','anag.dataProva','date')}</div><div class="grow">${field('Ora','anag.oraProva','time')}</div></div>`)+
+  card('Evento',`<label class="f">Tipo di evento</label>${chips('anag.occasione',['Sposa','Cerimonia','Serata / evento','Servizio foto','Quotidiano','Altro'])}
+  ${field(sposa?'Data delle nozze':'Data del trucco','anag.dataEvento','date')}
+  ${field('Luogo del trucco','anag.luogo','text','Dove avverrà il trucco (indirizzo / struttura)')}
+  <label class="f">Fascia oraria del trucco</label>
+  <div class="row"><div class="grow"><p class="hint" style="margin:0 0 6px">Inizio previsto</p><input type="time" data-bind="anag.oraInizio" value="${esc(a.oraInizio||'')}"></div>
+  <div class="grow"><p class="hint" style="margin:0 0 6px">Fine massima</p><input type="time" data-bind="anag.oraFine" value="${esc(a.oraFine||'')}"></div></div>
+  <p class="hint" style="margin-top:8px">${sposa?'Il trucco si fa di solito il giorno delle nozze: l\'orario massimo di fine è il vincolo da rispettare.':'Indica entro che ora il trucco deve essere concluso.'}</p>`)+
+  card('Note',area('','anag.note','Altre informazioni utili'));
+}
+function viewViso(){
+  const k=S.rec.viso.forma; const f=k&&FACES[k];
+  return H1('Forma del viso','Guardate insieme le geometrie e scegliete quella più vicina al viso della cliente.')+
+  card('Scegli la forma',`<div class="faces">${FACE_ORDER.map(x=>`<button type="button" class="face${k===x?' on':''}" data-chip="viso.forma" data-val="${x}">${faceSvg(x,false)}<span class="fn">${FACES[x].n}</span></button>`).join('')}</div>
+  ${f?`<div class="shapeinfo"><b>${f.n}</b>${esc(f.d)}</div>`:''}`)+
+  card('Pelle, occhi e labbra',`<label class="f">Tipo di pelle</label>${chips('viso.pelle',['Secca','Mista','Grassa','Sensibile','Matura','Rossori / couperose','Imperfezioni'],1)}
+  <label class="f">Forma degli occhi</label>${chips('viso.occhi',['Mandorla','Tondi','Incappucciati','Ravvicinati','Distanziati','All\'ingiù','All\'insù','Piccoli','Grandi'],1)}
+  <label class="f">Labbra</label>${chips('viso.labbra',['Sottili','Carnose','Labbro sup. sottile','Labbro inf. pieno','Asimmetriche','Cupido marcato'],1)}`)+
+  card('Note sul viso',area('','viso.note','es. asimmetrie, nei, occhiaie, cicatrici'));
+}
+function palette(arr){return `<div class="pal">${arr.map(([n,c])=>`<div class="sw"><i style="background:${c}"></i>${esc(n)}</div>`).join('')}</div>`;}
+const HOW={
+ prep:['Prima di cominciare',`<ul>
+  <li><b>Luce naturale</b> vicino a una finestra (o lampada diurna con resa del colore alta).</li>
+  <li><b>Viso struccato</b>, capelli raccolti, mantella bianca o grigia.</li>
+  <li>Conta il <b>colore naturale</b>: con i capelli tinti guarda radici e sopracciglia.</li>
+  <li><b>Ordine</b>: sottotono, intensità, profondità. Poi conferma con <b>rossetto e blush veri</b> vicino al viso.</li></ul>`],
+ sotto:['Come riconoscere il sottotono',`<ul>
+  <li><b>Vene del polso</b>: verdi = caldo, blu/viola = freddo, miste = neutro.</li>
+  <li><b>Oro o argento</b>: l'oro illumina = caldo, l'argento = freddo.</li>
+  <li><b>Telo sotto il mento</b>: bianco puro = freddo, avorio = caldo.</li>
+  <li><b>Pesca/corallo</b> = caldo, <b>rosa/fucsia</b> = freddo.</li>
+  <li><b>Neutro</b>: nessun segnale netto. Scegli neutro caldo o freddo in base al telo che dona di più.</li></ul>
+  <p><b>Attenzione:</b> rossori e abbronzatura ingannano.</p>`],
+ croma:['Come riconoscere l\'intensità',`<ul>
+  <li><b>Brillante</b>: contrasto netto tra pelle, capelli e occhi. I colori puri stanno bene.</li>
+  <li><b>Morbido</b>: pochi contrasti, tutto sfumato. Il colore vivo "mangia" il viso.</li>
+  <li><b>Test</b>: rosso o fucsia puro vicino al viso. Il viso si accende = brillante. Il colore vince sul viso = morbido.</li></ul>`],
+ prof:['Come riconoscere la profondità',`<ul>
+  <li>Guarda l'<b>insieme</b> di capelli naturali, occhi e pelle.</li>
+  <li><b>Chiaro</b>: biondo o castano chiaro, occhi chiari. <b>Scuro</b>: castano scuro o nero, occhi scuri. <b>Medio</b>: via di mezzo.</li></ul>`],
+ sub:['Come scegliere la sottostagione',`<p>Ogni stagione ha <b>3 sottostagioni</b>: non esistono tutte e 5 le caratteristiche in ogni stagione. Si sceglie quella legata al <b>tratto dominante</b>, cioè la prima cosa che si nota della persona.</p><ul>
+  <li><b>Primavera</b>: <b>chiara</b> (domina la luminosità) · <b>calda</b> (domina il calore dorato) · <b>brillante</b> (domina il contrasto vivo).</li>
+  <li><b>Estate</b>: <b>chiara</b> (luminosità delicata) · <b>fredda</b> (domina il sottotono freddo) · <b>morbida</b> (poco contrasto, tutto sfumato).</li>
+  <li><b>Autunno</b>: <b>morbido</b> (caldo ma attenuato) · <b>caldo</b> (domina il calore intenso) · <b>profondo</b> (domina la scurezza).</li>
+  <li><b>Inverno</b>: <b>profondo</b> (domina la scurezza) · <b>freddo</b> (domina il sottotono freddo netto) · <b>brillante</b> (contrasto altissimo).</li></ul>
+  <p><b>Verifica sul viso</b>: provare due o tre rossetti o blush della palette. Quello giusto uniforma la pelle, attenua ombre e occhiaie e rende gli occhi luminosi. Quello sbagliato ingiallisce o ingrigisce, evidenzia rossori e occhiaie, e il colore si vede più del viso.</p>
+  <p><b>Se sei indecisa</b>: provare la sottostagione vicina della stessa stagione e tenere quella che regge meglio il test.</p>`]
+};
+function how(id){
+  const [t,b]=HOW[id];
+  return `<details class="how" data-how="${id}"${S.open[id]?' open':''}><summary>${t}</summary><div class="hb">${b}</div></details>`;
+}
+function viewColori(){
+  const c=S.rec.colori; const season=seasonOf(c);
+  let h=H1('Colori per il trucco','Osservate la pelle a luce naturale, senza trucco: serve a scegliere i colori che la valorizzano.')+
+  card('Preparazione',how('prep'))+
+  card('Sottotono della pelle',chips('colori.sottotono',['Caldo','Neutro caldo','Neutro freddo','Freddo'])+'<div style="height:12px"></div>'+how('sotto'))+
+  card('Intensità e contrasto',chips('colori.croma',['Morbido','Brillante'])+'<div style="height:12px"></div>'+how('croma'))+
+  card('Profondità generale',chips('colori.profondita',['Chiaro','Medio','Scuro'])+'<div style="height:12px"></div>'+how('prof'))+
+  card('Colori naturali',field('Capelli','colori.capelli','text')+field('Occhi','colori.occhiCol','text'));
+  if(season){
+    const sug=c.profondita?SUGG[season][c.profondita.toLowerCase()]:null;
+    h+=card('Famiglia di colori',`<div class="season" style="margin-top:0"><span class="eyebrow">Famiglia suggerita</span><b>${season}</b>${esc(SEASON_D[season])}</div>
+    <label class="f">Sfumatura</label><p class="hint">La proposta si basa sulla profondità. La scelta finale è di Giorgia.</p>${how('sub')}
+    <div class="subs">${SUBS[season].map(([id,n],i)=>`<button type="button" class="sub${c.sub===id?' on':''}" data-chip="colori.sub" data-val="${id}"><b>${n}${sug===i?'<span class="tag">consigliata</span>':''}</b><span>${esc(SD[id].d)}</span></button>`).join('')}</div>`);
+  }
+  if(c.sub&&SD[c.sub]&&seasonOfSub(c.sub)===season){
+    const d=SD[c.sub];
+    h+=card('Palette consigliata · '+subName(c.sub),`<span class="eyebrow">Occhi</span>${palette(d.occhi)}<span class="eyebrow">Labbra</span>${palette(d.labbra)}<span class="eyebrow">Blush</span>${palette(d.blush)}<p class="hint">Metalli e gioielli: ${esc(d.m)}.</p>`);
+  }
+  const cn=S.rec.colori;
+  h+=card('Fino all\'evento',`<p class="hint" style="margin-top:0">Il trucco si decide su come sarà la cliente il giorno dell'evento. Se cambiano abbronzatura o capelli, la scheda mostrerà un promemoria 30 giorni prima.</p>
+  <label class="f">Abbronzatura prevista</label>${chips('colori.abb',['Nessuna','Leggera','Intensa'])}
+  <label class="f">Colore dei capelli</label>${chips('colori.capCambio',['Resta così','Cambierà'])}
+  ${cn.capCambio==='Cambierà'?field('Nuovo colore previsto','colori.capNuovi','text','es. più chiaro, biondo, rossiccio')+'<p class="hint" style="margin-top:8px">Il sottotono si valuta sul colore naturale (con la fascia), ma intensità di occhi, labbra e sopracciglia vanno pensate sul colore previsto. Se puoi, chiedi una foto di riferimento.</p>':''}
+  <label class="f">Sopracciglia previste</label>${chips('colori.sopr',['Invariate','Più chiare','Più scure'])}
+  ${cn.abb==='Leggera'||cn.abb==='Intensa'?`<div class="season" style="background:#F5EDD6;margin:16px 0 0"><b style="font-size:20px">Attenzione all'abbronzatura</b>La prova su pelle più chiara non rappresenta il risultato finale. Per simulare la carnagione prevista usa un <b>fondotinta più scuro</b> o una <b>terra</b> su viso e collo, segna le due tonalità e prevedi un <b>controllo prima dell'evento</b>.</div>`:''}
+  ${field('Fondotinta usato alla prova','colori.fondoOggi','text','marca e tonalità')}
+  ${field('Fondotinta previsto per il giorno','colori.fondoStima','text','se la pelle sarà più abbronzata')}`);
+  return h+card('Scelta con la cliente',area('Colori che piacciono alla cliente','colori.gusti','es. toni caldi, rosa, niente rosso')+area('Colori scelti per il trucco','colori.scelti','es. occhi bronzo, labbra terracotta, blush pesca'))+card('Note',area('','colori.note',''));
+}
+function viewAsp(){
+  return H1('Aspettative','Che trucco si immagina la cliente?')+
+  card('Stile',chips('asp.stili',['Naturale / effetto nudo','Soft glam','Glamour','Classico','Romantico','Moderno / grafico','Da sera'],1))+
+  card('Pelle, occhi e labbra',`<label class="f">Finish della pelle</label>${chips('asp.finish',['Luminoso','Satinato','Matte'])}
+  <label class="f">Intensità occhi</label>${chips('asp.occhi',['Delicata','Media','Intensa'])}
+  <label class="f">Labbra</label>${chips('asp.labbra',['Nude','Rosa','Corallo','Rosso','Scure / bordeaux','Lucide'])}`)+
+  card('Resistenza',chips('asp.resa',['Resistente alle lacrime','Lunga durata','Ritocchi in giornata'],1))+
+  card('Abito',`<p class="hint" style="margin-top:0">Serve solo ad armonizzare il trucco (occhi e labbra), non a consigliare l'abbigliamento.</p>
+  ${S.rec.anag.occasione==='Sposa'?`<label class="f">Colore dell'abito</label>${chips('asp.abito',['Bianco','Avorio / panna','Champagne / nude','Colorato'])}`:''}
+  ${field(S.rec.anag.occasione==='Sposa'?'Dettagli (scollatura, velo, accessori)':'Colore dell\'abito (se già deciso)','asp.abitoNote','text','es. lilla, nero, scollatura a barca')}`)+
+  card('Dettagli',area('Riferimenti / ispirazioni','asp.rif','Descrivi il look o incolla un link')+area('Da evitare','asp.evitare','')+field('Allergie / intolleranze','asp.allergie','text'));
+}
+function viewGuida(){
+  const k=S.rec.viso.forma;
+  if(!k) return H1('Linee guida','Scegli prima la forma del viso per vedere dove posizionare luci, contouring e blush.')+`<button class="btn" data-goto="1">Vai alla forma del viso</button>`;
+  const f=FACES[k], g=f.g, c=S.rec.colori, d=c.sub&&SD[c.sub];
+  return H1('Viso '+f.n.toLowerCase(),'Guida per costruire la fisionomia più armonica. Indicazioni di base: la valutazione finale è di Giorgia.')+
+  card('Schema',`<div class="diagram" style="border:0;padding:0">${faceSvg(k,true)}<div class="legend"><span><i style="background:#C9B37E"></i>Luce</span><span><i style="background:#7d6657"></i>Contouring</span><span><i style="background:#D9847C"></i>Blush</span></div></div>`)+
+  card('Consigli',`<dl class="guide" style="margin-top:-8px"><dt>Obiettivo</dt><dd>${esc(g.obiettivo)}</dd><dt>Contouring</dt><dd>${esc(g.contouring)}</dd><dt>Blush</dt><dd>${esc(g.blush)}</dd><dt>Punti luce</dt><dd>${esc(g.luce)}</dd><dt>In più</dt><dd>${esc(g.extra)}</dd></dl>`)+
+  (d?card('Colori · '+subName(c.sub),palette([...d.occhi,...d.labbra,...d.blush])):'');
+}
+function viewProva(){
+  const p=S.rec.prova;
+  return H1('Prova trucco','Segna i passaggi, i prodotti e le tecniche usate.')+
+  card('Passaggi',`${p.steps.map((s,i)=>`<div class="pstep"><div class="head"><span class="num">${i+1}</span><input type="text" data-step="${s.id}" data-k="nome" value="${esc(s.nome)}" placeholder="Passaggio"><button class="linkbtn" data-sdel="${s.id}" aria-label="Elimina" style="font-size:22px;color:var(--taupe)">×</button></div>
+  <textarea data-step="${s.id}" data-k="note" placeholder="Prodotto, tonalità, tecnica, pennello…">${esc(s.note)}</textarea></div>`).join('')}
+  <button class="btn ghost" data-act="addstep" style="margin-top:14px">+ Aggiungi passaggio</button>`)+
+  card('Note',area('Note della prova','prova.note','Cosa è piaciuto, cosa cambiare')+area('Da modificare per il giorno','prova.giorno',''))+
+  card('Foto della prova',`<div class="stack"><label class="btn sage" style="cursor:pointer">Scatta una foto<input type="file" class="phin" accept="image/*" capture="environment"></label>
+  <label class="btn ghost" style="cursor:pointer">Scegli dalla galleria<input type="file" class="phin" accept="image/*" multiple></label></div>
+  <div class="photos">${S.rec.photos.map(f=>`<div class="ph"><img src="${f.data}" alt=""><select data-plabel="${f.id}">${['Prova','Prima','Dopo','Riferimento'].map(l=>`<option${f.label===l?' selected':''}>${l}</option>`).join('')}</select><button class="del" data-pdel="${f.id}">Elimina</button></div>`).join('')}</div>`);
+}
+function orario(a){ const p=[]; if(a.oraInizio) p.push('inizio dalle '+a.oraInizio); if(a.oraFine) p.push('fine entro le '+a.oraFine); return p.join(' - '); }
+function listVal(v){return Array.isArray(v)?v.join(', '):(v||'');}
+function dl(pairs){return `<dl>${pairs.filter(p=>listVal(p[1])).map(([k,v])=>`<dt>${k}</dt><dd>${esc(listVal(v))}</dd>`).join('')}</dl>`;}
+function viewRiep(){
+  const r=S.rec,a=r.anag,v=r.viso,c=r.colori,s=r.asp,p=r.prova,d=c.sub&&SD[c.sub];
+  const steps=p.steps.filter(x=>x.note.trim());
+  const sec=(t,b)=>b.replace(/<dl><\/dl>/g,'').trim()?card(t,`<div class="sum">${b}</div>`):'';
+  return `<h1 class="stepT" style="margin-bottom:12px">${esc(fullName(r))}</h1><span class="rule"></span><p class="lead" style="margin-bottom:18px"><b>Giorno della prova trucco:</b> ${esc(provaDay(r))}</p>
+  <div style="margin:0 0 20px;display:flex;align-items:center;gap:10px"><span class="muted">Stato</span>${stChip(r,1)}</div>${tagsHtml(r)?`<div style="margin:-8px 0 18px">${tagsHtml(r)}</div>`:''}
+  <div class="stack" id="pdfbox" style="margin-bottom:8px">${S.pdf&&S.pdf.id===r.id?pdfButtons():`<button class="btn" data-act="pdf">Genera PDF</button>`}</div>`+
+  sec('Anagrafica',dl([['Tipo evento',a.occasione],['Email',a.email],['Telefono',a.tel],[a.occasione==='Sposa'?'Data nozze':'Data',a.dataEvento],['Luogo del trucco',a.luogo],['Orario',orario(a)],['Note',a.note]]))+
+  sec('Viso',dl([['Forma',v.forma&&FACES[v.forma].n],['Pelle',v.pelle],['Occhi',v.occhi],['Labbra',v.labbra],['Note',v.note]]))+
+  sec('Colori per il trucco',dl([['Sottotono',c.sottotono],['Intensità',c.croma],['Profondità',c.profondita],['Capelli',c.capelli],['Occhi',c.occhiCol],['Famiglia',c.sub&&subName(c.sub)]])+(d?palette([...d.occhi,...d.labbra,...d.blush]):'')+dl([['Piacciono alla cliente',c.gusti],['Scelti per il trucco',c.scelti],['Abbronzatura prevista',c.abb],['Capelli',c.capCambio==='Cambierà'?'Cambierà'+(c.capNuovi?': '+c.capNuovi:''):c.capCambio],['Sopracciglia previste',c.sopr],['Fondotinta alla prova',c.fondoOggi],['Fondotinta previsto per il giorno',c.fondoStima],['Note',c.note]]))+
+  sec('Aspettative',dl([['Stile',s.stili],['Finish',s.finish],['Occhi',s.occhi],['Labbra',s.labbra],['Resistenza',s.resa],['Abito',[s.abito,s.abitoNote].filter(Boolean).join(' · ')],['Riferimenti',s.rif],['Da evitare',s.evitare],['Allergie',s.allergie]]))+
+  sec('Prova trucco',(steps.length?`<dl>${steps.map(x=>`<dt>${esc(x.nome)}</dt><dd>${esc(x.note)}</dd>`).join('')}</dl>`:'')+dl([['Note',p.note],['Per il giorno',p.giorno]]))+
+  (r.photos.length?card('Foto',`<div class="photos" style="margin-top:0">${r.photos.map(f=>`<div class="ph"><img src="${f.data}" alt=""><div class="muted" style="margin-top:6px">${esc(f.label)}</div></div>`).join('')}</div>`):'');
+}
+function pdfButtons(){return `<div class="card"><b>PDF pronto</b><div class="stack" style="margin-top:12px"><button class="btn" data-act="share">Condividi / Salva PDF</button><a class="btn ghost" href="${S.pdf.url}" target="_blank" rel="noopener">Apri anteprima</a><button class="btn ghost" data-act="pdf">Rigenera (dopo modifiche)</button></div></div>`;}
+
+function render(keepScroll){
+  const y=window.scrollY;
+  renderTop(); renderNav();
+  const m=$('#main');
+  if(!S.rec) m.innerHTML=viewHome();
+  else m.innerHTML=({anag:viewAnag,viso:viewViso,colori:viewColori,asp:viewAsp,guida:viewGuida,prova:viewProva,riepilogo:viewRiep})[STEPS[S.step].id]();
+  if(keepScroll) window.scrollTo(0,y); else window.scrollTo(0,0);
+}
+
+/* ====================== PANNELLI (bottom sheet) ====================== */
+function nf(label,k,type,ph){ return `<label class="f">${label}</label><input type="${type||'text'}" data-nb="${k}" value="${esc(S.nuovo[k]||'')}" placeholder="${esc(ph||'')}" autocomplete="off"${type==='tel'?' inputmode="tel"':''}${type==='email'?' inputmode="email" autocapitalize="off"':''}>`; }
+function renderSheet(){
+  const el=$('#sheet'), sh=S.sheet;
+  if(!sh){ el.innerHTML=''; document.body.style.overflow=''; return; }
+  document.body.style.overflow='hidden';
+  let h='';
+  if(sh.type==='stato'){
+    const r=recById(sh.id); if(!r){S.sheet=null;return renderSheet();}
+    const d=sh.draft, dirty=statoDirty();
+    h=`<h3>${esc(fullName(r))}</h3><p class="muted">Aggiorna le fasi della scheda.</p>
+    <div class="phase"><div class="ph-h"><span class="ph-n">1</span><b>Prova trucco</b></div>
+      <span class="f2">Stato</span>${seg('provaFatta',[[0,'Da fare'],[1,'Fatta']],d.provaFatta)}
+      ${d.provaFatta?`<span class="f2">Pagamento</span>${seg('provaInc',[[0,'Da incassare','warn'],[1,'Incassata','ok']],d.provaInc)}`:''}
+    </div>
+    <div class="phase${d.provaFatta?'':' locked'}"><div class="ph-h"><span class="ph-n">2</span><b>Trucco definitivo</b></div>
+      ${d.provaFatta?`<span class="f2">Conferma</span>${seg('confermato',[[0,'Da confermare'],[1,'Confermato']],d.confermato)}
+      ${d.confermato?`<span class="f2">Data del trucco definitivo</span><input type="date" data-dd value="${esc(d.dataEvento)}"><span class="f2">Trucco</span>${seg('defFatto',[[0,'Da fare'],[1,'Fatto']],d.defFatto)}`:''}
+      ${d.defFatto?`<span class="f2">Pagamento</span>${seg('defInc',[[0,'Da incassare','warn'],[1,'Incassato','ok']],d.defInc)}`:''}`
+      :`<p class="note">Si sblocca quando la prova trucco è fatta.</p>`}
+    </div>
+    <div class="chips" style="margin-top:18px"><button class="chip${d.annullata?' on':''}" data-seg="annullata" data-val="${d.annullata?0:1}">Scheda annullata / non confermata</button></div>
+    <div class="stack" style="margin-top:24px">${dirty?'<button class="btn" data-act="savestato">Salva</button><button class="btn ghost" data-act="sheetclose">Annulla</button>':'<button class="btn ghost" data-act="sheetclose">Chiudi</button>'}</div>`;
+  } else if(sh.type==='sposta'){
+    const r=recById(sh.id), prova=sh.kind==='prova';
+    h=`<h3>${sh.kind==='nodata'?'Imposta la data':'Sposta'}</h3><p class="muted">${esc(fullName(r))} · ${prova?'prova trucco':'trucco definitivo'}</p>
+    <label class="f">${prova?'Nuovo giorno della prova':'Data del trucco definitivo'}</label><input type="date" data-sp="date" value="${esc(sh.date||'')}">
+    ${prova?`<label class="f">Ora</label><input type="time" data-sp="ora" value="${esc(sh.ora||'')}">`:''}
+    <div class="stack" style="margin-top:26px"><button class="btn" data-act="savesposta">Salva</button><button class="btn ghost" data-act="sheetclose">Annulla</button></div>`;
+  } else if(sh.type==='chiudi'){
+    h=`<h3>Aggiorno l'agenda?</h3><p class="lead" style="margin:6px 0 20px">La prova trucco è stata fatta? Se sì, la scheda passa a <b>Da confermare</b>.</p>
+    <div class="stack"><button class="btn" data-act="closepaid">Sì, fatta e incassata</button><button class="btn sage" data-act="closeunpaid">Sì, fatta, da incassare</button><button class="btn ghost" data-act="closeno">Non ancora, salva e basta</button></div>`;
+  } else if(sh.type==='nuovo'){
+    h=`<h3>Nuova scheda</h3><p class="muted">Bozza della scheda: il resto lo compili durante l'incontro.</p>
+    ${nf('Nome','nome')}${nf('Cognome','cognome')}${nf('Cellulare','tel','tel')}${nf('Email','email','email')}
+    <label class="f">Tipo di evento</label><div class="chips">${['Sposa','Cerimonia','Serata / evento','Servizio foto','Quotidiano','Altro'].map(o=>`<button class="chip${S.nuovo.occasione===o?' on':''}" data-nbchip="${esc(o)}">${o}</button>`).join('')}</div>
+    <div class="row" style="align-items:flex-start"><div class="grow" style="flex:1.15">${nf('Giorno della prova','dataProva','date')}</div><div class="grow">${nf('Ora','oraProva','time')}</div></div>
+    ${nf('Data dell\'evento (se già nota)','dataEvento','date')}
+    <div class="stack" style="margin-top:26px"><button class="btn" data-act="savenew">Salva scheda</button><button class="btn sage" data-act="savenewgo">Salva e inizia ora</button><button class="btn ghost" data-act="sheetclose">Annulla</button></div>`;
+  }
+  const keep=el.querySelector('.sheet'); const top=keep?keep.scrollTop:0;
+  el.innerHTML=`<div class="ov" data-act="overlay"></div><div class="sheet" role="dialog" aria-modal="true">${h}</div>`;
+  const ns=el.querySelector('.sheet'); if(ns) ns.scrollTop=top;
+}
+function draftFrom(r){
+  const st=stId(r), f=r.fase||{}, p=r.pag||{}, an=st==='annullato';
+  const provaFatta=['attesa','confermato','concluso'].includes(st)||(an&&!!f.provaFatta);
+  const confermato=['confermato','concluso'].includes(st)||(an&&!!f.confermato);
+  const defFatto=st==='concluso'||(an&&!!f.defFatto);
+  return {provaFatta,provaInc:provaFatta&&!!p.prova,confermato,defFatto,defInc:defFatto&&!!p.saldo,annullata:an,dataEvento:r.anag.dataEvento||''};
+}
+function applyDraft(r,d){
+  r.fase={provaFatta:d.provaFatta,confermato:d.confermato,defFatto:d.defFatto};
+  r.pag={prova:d.provaFatta&&d.provaInc,saldo:d.defFatto&&d.defInc};
+  r.stato=d.annullata?'annullato':d.defFatto?'concluso':d.confermato?'confermato':d.provaFatta?'attesa':'da-fare';
+  if(d.confermato&&d.dataEvento) r.anag.dataEvento=d.dataEvento;
+  r.updated=Date.now();
+}
+function segSet(key,v){
+  const d=S.sheet.draft; v=!!+v; d[key]=v;
+  if(key==='provaFatta'&&!v){ d.provaInc=false; d.confermato=false; d.defFatto=false; d.defInc=false; }
+  if(key==='confermato'&&!v){ d.defFatto=false; d.defInc=false; }
+  if(key==='defFatto'&&!v){ d.defInc=false; }
+}
+const seg=(key,opts,val)=>`<div class="seg">${opts.map(([v,l,c])=>`<button type="button" class="${!!val===!!v?'on '+(c||''):''}" data-seg="${key}" data-val="${v}">${l}</button>`).join('')}</div>`;
+function statoDirty(){ const sh=S.sheet; if(!sh||sh.type!=='stato') return false; const r=recById(sh.id); return JSON.stringify(sh.draft)!==JSON.stringify(draftFrom(r)); }
+function closeSheet(){ S.sheet=null; renderSheet(); }
+async function saveNuovo(go){
+  const n=S.nuovo;
+  if(!n.nome.trim()&&!n.cognome.trim()){ toast('Inserisci almeno nome o cognome'); return; }
+  if(!n.dataProva){ if(go) n.dataProva=todayIso(); else { toast('Inserisci il giorno della prova'); return; } }
+  const r=newRec();
+  Object.assign(r.anag,{nome:n.nome.trim(),cognome:n.cognome.trim(),tel:n.tel.trim(),email:n.email.trim(),occasione:n.occasione,dataProva:n.dataProva,oraProva:n.oraProva,dataEvento:n.dataEvento});
+  r.stato='da-fare'; r.step=0;
+  await dbPut(r); S.list=await dbAll(); closeSheet();
+  if(go){ S.rec=S.list.find(x=>x.id===r.id)||r; S.step=0; render(); } else { render(true); toast('Scheda salvata'); }
+}
+
+/* ====================== AZIONI ====================== */
+async function go(step){ await saveNow(); S.step=Math.max(0,Math.min(STEPS.length-1,step)); touch(); render(); }
+async function home(){ await saveNow(); S.rec=null; S.list=await dbAll(); render(); }
+
+document.addEventListener('click',async e=>{
+  const t=e.target.closest('[data-qa],[data-chip],[data-act],[data-open],[data-sdel],[data-pdel],[data-goto],[data-state],[data-seg],[data-nbchip],[data-filtro]'); if(!t) return;
+  if(t.dataset.qa){ e.stopPropagation(); const r=recById(t.dataset.id), at=attention(r);
+    if(t.dataset.qa==='fatta'){ const d=draftFrom(r); if(at.kind==='prova') d.provaFatta=true; else { d.confermato=true; d.defFatto=true; } applyDraft(r,d); await dbPut(r); render(true); toast(at.kind==='prova'?'Prova segnata come fatta: ora è in Da confermare':'Trucco segnato come fatto'); }
+    else if(t.dataset.qa==='sposta'){ S.sheet={type:'sposta',id:r.id,kind:at.kind,date:at.kind==='prova'?(r.anag.dataProva||''):(r.anag.dataEvento||''),ora:r.anag.oraProva||''}; renderSheet(); }
+    else { S.sheet={type:'stato',id:r.id,draft:draftFrom(r)}; renderSheet(); }
+    return; }
+  if(t.dataset.filtro){ S.filtro=t.dataset.filtro; $('#agenda').innerHTML=agendaHtml(); return; }
+  if(t.dataset.state){ e.stopPropagation(); const r=recById(t.dataset.state); S.sheet={type:'stato',id:r.id,draft:draftFrom(r)}; renderSheet(); return; }
+  if(t.dataset.seg){ segSet(t.dataset.seg,t.dataset.val); renderSheet(); return; }
+  if(t.dataset.nbchip){ S.nuovo.occasione=S.nuovo.occasione===t.dataset.nbchip?'':t.dataset.nbchip; renderSheet(); return; }
+  if(t.dataset.chip){
+    const path=t.dataset.chip,val=t.dataset.val;
+    if(t.hasAttribute('data-multi')){ const a=getp(S.rec,path)||[]; const i=a.indexOf(val); i>=0?a.splice(i,1):a.push(val); setp(S.rec,path,a); }
+    else setp(S.rec,path,getp(S.rec,path)===val?'':val);
+    if(path==='colori.sottotono'||path==='colori.croma'){ S.rec.colori.sub=''; }
+    touch(); render(true); return;
+  }
+  if(t.dataset.open){ S.rec=S.list.find(r=>r.id===t.dataset.open); S.step=Math.min(S.rec.step||0,STEPS.length-1); render(); return; }
+  if(t.dataset.goto){ go(+t.dataset.goto); return; }
+  if(t.dataset.sdel){ S.rec.prova.steps=S.rec.prova.steps.filter(s=>s.id!==t.dataset.sdel); touch(); render(true); return; }
+  if(t.dataset.pdel){ S.rec.photos=S.rec.photos.filter(f=>f.id!==t.dataset.pdel); touch(); render(true); return; }
+  switch(t.dataset.act){
+    case 'new': S.rec=newRec(); S.step=0; await saveNow(); render(); break;
+    case 'newappt': S.nuovo={nome:'',cognome:'',tel:'',email:'',occasione:'',dataProva:'',oraProva:'',dataEvento:''}; S.sheet={type:'nuovo'}; renderSheet(); break;
+    case 'savenew': saveNuovo(false); break;
+    case 'savenewgo': saveNuovo(true); break;
+    case 'sheetclose': closeSheet(); break;
+    case 'piu': S.piu=!S.piu; $('#agenda').innerHTML=agendaHtml(); break;
+    case 'savesposta': { const sh=S.sheet, r=recById(sh.id); if(!sh.date){ toast('Inserisci la data'); break; } if(sh.kind==='prova'){ r.anag.dataProva=sh.date; r.anag.oraProva=sh.ora||''; } else r.anag.dataEvento=sh.date; r.updated=Date.now(); await dbPut(r); closeSheet(); render(true); toast('Data aggiornata'); break; }
+    case 'overlay': if(S.sheet&&S.sheet.type==='stato'&&statoDirty()) toast('Modifiche non salvate: usa Salva o Annulla'); else closeSheet(); break;
+    case 'savestato': { const sh=S.sheet, r=recById(sh.id); if(sh.draft.confermato&&!sh.draft.dataEvento&&!sh.draft.annullata){ toast('Inserisci la data del trucco definitivo'); break; } applyDraft(r,sh.draft); await dbPut(r); closeSheet(); render(true); toast('Salvato'); break; }
+    case 'close': if(stId(S.rec)==='da-fare'){ S.sheet={type:'chiudi'}; renderSheet(); } else { await home(); toast('Agenda aggiornata'); } break;
+    case 'closepaid': { const d=draftFrom(S.rec); d.provaFatta=true; d.provaInc=true; applyDraft(S.rec,d); } await saveNow(); closeSheet(); await home(); toast('Agenda aggiornata: la scheda è in Da confermare'); break;
+    case 'closeunpaid': { const d=draftFrom(S.rec); d.provaFatta=true; d.provaInc=false; applyDraft(S.rec,d); } await saveNow(); closeSheet(); await home(); toast('Agenda aggiornata: la scheda è in Da confermare'); break;
+    case 'closeno': closeSheet(); await home(); toast('Agenda aggiornata'); break;
+    case 'home': home(); break;
+    case 'next': go(S.step+1); break;
+    case 'prev': go(S.step-1); break;
+    case 'addstep': S.rec.prova.steps.push({id:uid(),nome:'',note:''}); touch(); render(true); setTimeout(()=>{const i=document.querySelectorAll('.pstep input');i[i.length-1]&&i[i.length-1].focus();},50); break;
+    case 'pdf': makePdf(t); break;
+    case 'share': sharePdf(); break;
+  }
+});
+document.addEventListener('toggle',e=>{ const d=e.target; if(d.dataset&&d.dataset.how) S.open[d.dataset.how]=d.open; },true);
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.dataset.nb){ S.nuovo[t.dataset.nb]=t.value; }
+  else if(t.dataset.sp){ S.sheet[t.dataset.sp]=t.value; }
+  else if(t.hasAttribute('data-dd')){ S.sheet.draft.dataEvento=t.value; }
+  else if(t.dataset.bind){ setp(S.rec,t.dataset.bind,t.value); touch(); }
+  else if(t.dataset.step){ const s=S.rec.prova.steps.find(x=>x.id===t.dataset.step); if(s){ s[t.dataset.k]=t.value; touch(); } }
+  else if(t.id==='search'){ S.q=t.value; $('#clist').innerHTML=homeList(); }
+});
+document.addEventListener('change',async e=>{
+  const t=e.target;
+  if(t.hasAttribute('data-dd')){ S.sheet.draft.dataEvento=t.value; renderSheet(); }
+  else if(t.id==='periodo'){ S.periodo=t.value; $('#agenda').innerHTML=agendaHtml(); }
+  else if(t.dataset.plabel){ const f=S.rec.photos.find(x=>x.id===t.dataset.plabel); if(f){f.label=t.value; touch();} }
+  else if(t.classList.contains('phin')){ const files=[...t.files]; t.value=''; if(!files.length) return; let ok=0; for(const f of files){ try{ S.rec.photos.push({id:uid(),label:t.dataset.label||'Prova',data:await shrink(f)}); ok++; }catch(_){ toast('Foto non leggibile (formato non supportato?)'); } } if(ok){ touch(); await saveNow(); render(true); toast(ok+(ok>1?' foto aggiunte':' foto aggiunta')); } }
+});
+
+/* ---------- foto: ridimensiona per risparmiare spazio ---------- */
+function shrink(file,max=1600,q=.82){
+  return new Promise((res,rej)=>{
+    const url=URL.createObjectURL(file), im=new Image();
+    im.onload=()=>{ const k=Math.min(1,max/Math.max(im.naturalWidth,im.naturalHeight)); const c=document.createElement('canvas');
+      c.width=Math.round(im.naturalWidth*k); c.height=Math.round(im.naturalHeight*k); c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+      URL.revokeObjectURL(url); res(c.toDataURL('image/jpeg',q)); };
+    im.onerror=()=>{URL.revokeObjectURL(url);rej();}; im.src=url;
+  });
+}
+
+/* ---------- salvataggio file (PDF) ---------- */
+async function shareOrSave(blob,name,title){
+  try{ const dl=window.claude&&window.claude.use&&await window.claude.use('downloads'); if(dl){ await dl.save({filename:name,data:blob}); return; } }catch(e){ if(e&&e.code==='declined') return; }
+  const file=new File([blob],name,{type:blob.type});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){ try{ await navigator.share({files:[file],title}); return; }catch(e){ if(e&&e.name==='AbortError') return; } }
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);
+}
+
+/* ====================== PDF ====================== */
+const lat=s=>String(s==null?'':s).replace(/[’‘]/g,"'").replace(/[“”]/g,'"').replace(/[–—]/g,'-').replace(/…/g,'...').replace(/[^\x09\x0A\x20-\x7E -ÿ]/g,'');
+function svgPng(svg,w,h){
+  return new Promise((res,rej)=>{
+    const im=new Image(); im.onload=()=>{ const c=document.createElement('canvas'); c.width=w; c.height=h; const x=c.getContext('2d'); x.fillStyle='#F8F7F4'; x.fillRect(0,0,w,h); x.drawImage(im,0,0,w,h); res(c.toDataURL('image/png')); };
+    im.onerror=rej; im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+  });
+}
+function imgSize(src){return new Promise(r=>{const i=new Image();i.onload=()=>r([i.naturalWidth,i.naturalHeight]);i.onerror=()=>r([3,4]);i.src=src;});}
+const hex2rgb=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+
+async function buildPdf(r){
+  const {jsPDF}=window.jspdf; const doc=new jsPDF({unit:'mm',format:'a4'});
+  const W=210,H=297,M=20,CW=W-2*M; let y=M+4;
+  const CH=[43,43,43],GOLD=[201,179,126],TAUPE=[150,138,126],SAGE=[138,155,140];
+  const bg=()=>{doc.setFillColor(248,247,244);doc.rect(0,0,W,H,'F');};
+  const np=()=>{doc.addPage();bg();y=M+4;};
+  const ensure=h=>{if(y+h>H-M-8) np();};
+  bg();
+  const a=r.anag,v=r.viso,c=r.colori,s=r.asp,p=r.prova,d=c.sub&&SD[c.sub];
+
+  // intestazione
+  doc.setTextColor(...CH); doc.setFont('times','normal'); doc.setFontSize(24); doc.text('MATÉA',M,y+4,{charSpace:2.4});
+  doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...SAGE); doc.text('SKINCARE STUDIO  ·  CONSULENZA TRUCCO',M,y+10,{charSpace:.8});
+  y+=17; doc.setDrawColor(...GOLD); doc.setLineWidth(.4); doc.line(M,y,W-M,y); y+=12;
+  doc.setTextColor(...CH); doc.setFont('times','bold'); doc.setFontSize(27); doc.text(lat(fullName(r)),M,y); y+=8;
+  doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(...TAUPE);
+  doc.text(lat('Giorno della prova trucco: '+provaDay(r)),M,y); y+=10;
+
+  const ttl=(x,yy,t)=>{ doc.setFont('times','bold'); doc.setFontSize(17); const w=doc.getTextWidth(lat(t)); doc.setFillColor(205,214,207); doc.rect(x-1,yy-1.4,w+2,3.4,'F'); doc.setTextColor(...CH); doc.text(lat(t),x,yy); };
+  const section=t=>{ ensure(22); y+=6; ttl(M,y,t); y+=8; };
+  const kv=(k,val)=>{ val=listVal(val); if(!String(val).trim()) return;
+    const lines=doc.splitTextToSize(lat(val),CW); ensure(8+lines.length*4.6);
+    doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...TAUPE); doc.text(lat(k).toUpperCase(),M,y,{charSpace:.6}); y+=4.2;
+    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(...CH); doc.text(lines,M,y); y+=lines.length*4.6+2.6; };
+  const sw=(label,arr)=>{ if(!arr||!arr.length) return; ensure(24);
+    doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...TAUPE); doc.text(label.toUpperCase(),M,y,{charSpace:.6}); y+=3.5;
+    arr.forEach(([n,h],i)=>{ const x=M+i*40; doc.setFillColor(...hex2rgb(h)); doc.setDrawColor(225,220,212); doc.setLineWidth(.2); doc.circle(x+5,y+5,5,'FD');
+      doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...CH); doc.text(doc.splitTextToSize(lat(n),26),x+12,y+5.6); });
+    y+=14; };
+
+  /* ---------- PAGINA 1: anagrafica + viso (2 colonne), poi armocromia ---------- */
+  const CWc=(CW-10)/2, X2=M+CWc+10, g3=(CW-16)/3;
+  const titleAt=(x,yy,t)=>{ ttl(x,yy,t); return yy+9; };
+  const itemsAt=(x,w,yy,items)=>{ items.forEach(([k,val])=>{ val=listVal(val); if(!String(val).trim()) return;
+    const L=doc.splitTextToSize(lat(val),w); doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...TAUPE); doc.text(lat(k).toUpperCase(),x,yy,{charSpace:.6}); yy+=4.2;
+    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(...CH); doc.text(L,x,yy); yy+=L.length*4.6+2.6; }); return yy; };
+
+  let ya=titleAt(M,y+4,'Anagrafica'), yb=titleAt(X2,y+4,'Viso');
+  ya=itemsAt(M,CWc,ya,[['Tipo evento',a.occasione],['Email',a.email],['Telefono',a.tel],[a.occasione==='Sposa'?'Data nozze':'Data',fmtIso(a.dataEvento)],['Luogo del trucco',a.luogo],['Orario',orario(a)],['Note',a.note]]);
+  yb=itemsAt(X2,CWc,yb,[['Forma del viso',v.forma&&FACES[v.forma].n],['Tipo di pelle',v.pelle],['Forma degli occhi',v.occhi],['Labbra',v.labbra],['Note',v.note]]);
+  y=Math.max(ya,yb)+2;
+
+  doc.setDrawColor(225,220,212); doc.setLineWidth(.3); doc.line(M,y,W-M,y); y+=9;
+  y=titleAt(M,y,'Colori per il trucco');
+  const arr=[['Sottotono',c.sottotono],['Intensita',c.croma],['Profondita',c.profondita],['Capelli',c.capelli],['Occhi',c.occhiCol],['Famiglia',c.sub&&subName(c.sub)]];
+  for(let row=0;row<2;row++){ let ym=y; for(let i=0;i<3;i++){ const yy=itemsAt(M+i*(g3+8),g3,y,[arr[row*3+i]]); ym=Math.max(ym,yy); } y=ym; }
+  if(d){
+    y+=1; doc.setFont('times','italic'); doc.setFontSize(12); doc.setTextColor(...CH);
+    const L=doc.splitTextToSize(lat(d.d+' Metalli: '+d.m+'.'),CW); doc.text(L,M,y); y+=L.length*5+4;
+    [['Occhi',d.occhi],['Labbra',d.labbra],['Blush',d.blush]].forEach(([lab,list],i)=>{
+      const x=M+i*(g3+8); let yy=y;
+      doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...TAUPE); doc.text(lab.toUpperCase(),x,yy,{charSpace:.6}); yy+=4;
+      list.forEach(([n,h])=>{ doc.setFillColor(...hex2rgb(h)); doc.setDrawColor(225,220,212); doc.setLineWidth(.2); doc.circle(x+5.5,yy+5.5,5.5,'FD');
+        doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...CH); doc.text(doc.splitTextToSize(lat(n),g3-15),x+14,yy+6.2); yy+=13; });
+    });
+    y+=4+13*3;
+  }
+  kv('Piacciono alla cliente',c.gusti); kv('Scelti per il trucco',c.scelti); kv('Abbronzatura prevista',c.abb); kv('Capelli fino all\'evento',c.capCambio==='Cambierà'?'Cambierà'+(c.capNuovi?': '+c.capNuovi:''):c.capCambio); kv('Sopracciglia previste',c.sopr); kv('Fondotinta alla prova',c.fondoOggi); kv('Fondotinta previsto per il giorno',c.fondoStima); kv('Note',c.note);
+
+  /* ---------- PAGINA 2: aspettative + linee guida ---------- */
+  np();
+  y=titleAt(M,y+4,'Aspettative');
+  let yl=itemsAt(M,CWc,y,[['Stile',s.stili],['Finish',s.finish],['Intensita occhi',s.occhi],['Labbra',s.labbra],['Resistenza',s.resa]]);
+  let yr=itemsAt(X2,CWc,y,[['Abito',[s.abito,s.abitoNote].filter(Boolean).join(' · ')],['Riferimenti',s.rif],['Da evitare',s.evitare],['Allergie',s.allergie]]);
+  y=Math.max(yl,yr)+2;
+
+  if(v.forma){
+    const f=FACES[v.forma]; section('Linee guida - viso '+f.n.toLowerCase());
+    try{
+      const png=await svgPng(faceSvg(v.forma,true,'width="620" height="769"'),620,769);
+      ensure(72); const ih=66,iw=ih*620/769; doc.addImage(png,'PNG',M,y,iw,ih);
+      const tx=M+iw+8, tw=W-M-tx; let ty=y+3; const g=f.g;
+      [['Obiettivo',g.obiettivo],['Contouring',g.contouring],['Blush',g.blush],['Punti luce',g.luce]].forEach(([k,t])=>{
+        const L=doc.splitTextToSize(lat(t),tw); doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...TAUPE); doc.text(k.toUpperCase(),tx,ty,{charSpace:.6}); ty+=4;
+        doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(...CH); doc.text(L,tx,ty); ty+=L.length*4.1+3; });
+      y+=ih+6;
+    }catch(_){ }
+  }
+
+  const steps=p.steps.filter(x=>x.note.trim());
+  if(steps.length||p.note||p.giorno){
+    section('Prova trucco');
+    steps.forEach((x,i)=>kv((i+1)+'. '+x.nome,x.note));
+    kv('Note della prova',p.note); kv('Da modificare per il giorno',p.giorno);
+  }
+
+  if(r.photos.length){
+    if(y>H-M-160) np();
+    section('Foto della prova');
+    const gw=(CW-8)/2; let col=0, rowH=0, ry=y;
+    for(const f of r.photos){
+      const [iw,ih]=await imgSize(f.data); let w=gw,h=gw*ih/iw; if(h>110){h=110;w=h*iw/ih;}
+      if(col===0){ ensure(h+12); ry=y; rowH=0; }
+      else if(ry+h+12>H-M-8){ np(); col=0; ry=y; rowH=0; }
+      const x=M+col*(gw+8);
+      doc.addImage(f.data,'JPEG',x,ry,w,h); doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...TAUPE); doc.text(lat(f.label),x,ry+h+4.5);
+      rowH=Math.max(rowH,h+9);
+      if(col===1){ y=ry+rowH; col=0; } else col=1;
+    }
+    if(col===1) y=ry+rowH;
+  }
+
+  const n=doc.getNumberOfPages();
+  for(let i=1;i<=n;i++){ doc.setPage(i); doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(...TAUPE);
+    doc.text('Matea Skincare Studio  -  Consulenza trucco',M,H-12); doc.text(i+' / '+n,W-M,H-12,{align:'right'}); }
+  return doc.output('blob');
+}
+
+async function makePdf(btn){
+  if(!window.jspdf){ toast('Libreria PDF non caricata: controlla la connessione'); return; }
+  const old=btn.textContent; btn.disabled=true; btn.textContent='Creo il PDF…';
+  try{
+    await saveNow();
+    const blob=await buildPdf(S.rec);
+    if(S.pdf) URL.revokeObjectURL(S.pdf.url);
+    const nm='consulenza-'+(fullName(S.rec).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'cliente')+'.pdf';
+    S.pdf={id:S.rec.id,blob,name:nm,url:URL.createObjectURL(blob)};
+    const box=$('#pdfbox'); if(box){ box.innerHTML=pdfButtons(); box.scrollIntoView({behavior:'smooth',block:'center'}); }
+  }catch(e){ console.error(e); toast('Errore nella creazione del PDF'); }
+  btn.disabled=false; btn.textContent=old;
+}
+function sharePdf(){ if(S.pdf) shareOrSave(S.pdf.blob,S.pdf.name,'Consulenza trucco'); }
+
+/* ====================== AVVIO ====================== */
+(async function init(){
+  try{ navigator.storage&&navigator.storage.persist&&navigator.storage.persist(); }catch(_){}
+  S.list=await dbAll(); render();
+  if(useMem) toast('Memoria del browser non disponibile: le schede non verranno salvate');
+})();
+window.addEventListener('pagehide',saveNow);
+document.addEventListener('visibilitychange',()=>{ if(document.hidden) saveNow(); });
+})();
+</script>
+</body>
+</html>
