@@ -39,7 +39,7 @@ Risorse caricate da internet: i font da Google Fonts e la libreria **jsPDF 2.5.1
 
 ### Schermata principale
 
-- **Card "Crea scheda"**: il pulsante "+ Aggiungi scheda" apre un pannello con nome, cognome, cellulare, email, tipo di evento, giorno e ora della prova, data dell'evento. Due azioni: **Salva scheda** (va in agenda come bozza) oppure **Salva e inizia ora** (apre subito la scheda a passi).
+- **Card "Crea scheda"**: il pulsante "+ Aggiungi scheda" apre un pannello con nome, cognome, cellulare, email, tipo di evento, giorno e ora della prova, data dell'evento. Due azioni: **Crea appuntamento in agenda** (la prova è in una data futura: nasce una bozza in agenda) oppure **Inizia subito e compila** (la prova è oggi: apre subito la scheda a passi).
 - **Card "Agenda"**: elenco a pill con conteggi.
   - **Calendario** (predefinita): prove da fare e trucchi confermati, per data. In cima le schede **scadute in rosso** ("Da aggiornare"); poi i **prossimi 30 giorni**; il resto è in un blocco chiuso **"Più avanti · N schede · fino a …"** che si apre al tocco.
   - **Attesa conferma**, **Fatti**, **Incassi** (tutte le schede con un incasso in sospeso), **Annullati**, **Tutti**.

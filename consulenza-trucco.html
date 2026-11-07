@@ -772,12 +772,12 @@ function renderSheet(){
     h=`<h3>Aggiorno l'agenda?</h3><p class="lead" style="margin:6px 0 20px">La prova trucco è stata fatta? Se sì, la scheda passa a <b>Da confermare</b>.</p>
     <div class="stack"><button class="btn" data-act="closepaid">Sì, fatta e incassata</button><button class="btn sage" data-act="closeunpaid">Sì, fatta, da incassare</button><button class="btn ghost" data-act="closeno">Non ancora, salva e basta</button></div>`;
   } else if(sh.type==='nuovo'){
-    h=`<h3>Nuova scheda</h3><p class="muted">Bozza della scheda: il resto lo compili durante l'incontro.</p>
+    h=`<h3>Nuova scheda</h3><p class="muted">Questi sono i dati di partenza. Il resto si compila durante la prova.</p>
     ${nf('Nome','nome')}${nf('Cognome','cognome')}${nf('Cellulare','tel','tel')}${nf('Email','email','email')}
     <label class="f">Tipo di evento</label><div class="chips">${['Sposa','Cerimonia','Serata / evento','Servizio foto','Quotidiano','Altro'].map(o=>`<button class="chip${S.nuovo.occasione===o?' on':''}" data-nbchip="${esc(o)}">${o}</button>`).join('')}</div>
     <div class="row" style="align-items:flex-start"><div class="grow" style="flex:1.15">${nf('Giorno della prova','dataProva','date')}</div><div class="grow">${nf('Ora','oraProva','time')}</div></div>
     ${nf('Data dell\'evento (se già nota)','dataEvento','date')}
-    <div class="stack" style="margin-top:26px"><button class="btn" data-act="savenew">Salva scheda</button><button class="btn sage" data-act="savenewgo">Salva e inizia ora</button><button class="btn ghost" data-act="sheetclose">Annulla</button></div>`;
+    <div class="stack" style="margin-top:26px"><button class="btn" data-act="savenew">Crea appuntamento in agenda</button><button class="btn sage" data-act="savenewgo">Inizia subito e compila</button><button class="btn ghost" data-act="sheetclose">Annulla</button></div>`;
   }
   const keep=el.querySelector('.sheet'); const top=keep?keep.scrollTop:0;
   el.innerHTML=`<div class="ov" data-act="overlay"></div><div class="sheet" role="dialog" aria-modal="true">${h}</div>`;
@@ -817,7 +817,7 @@ async function saveNuovo(go){
   Object.assign(r.anag,{nome:n.nome.trim(),cognome:n.cognome.trim(),tel:n.tel.trim(),email:n.email.trim(),occasione:n.occasione,dataProva:n.dataProva,oraProva:n.oraProva,dataEvento:n.dataEvento});
   r.stato='da-fare'; r.step=0;
   await dbPut(r); S.list=await dbAll(); closeSheet();
-  if(go){ S.rec=S.list.find(x=>x.id===r.id)||r; S.step=0; render(); } else { render(true); toast('Scheda salvata'); }
+  if(go){ S.rec=S.list.find(x=>x.id===r.id)||r; S.step=0; render(); } else { render(true); toast('Appuntamento creato in agenda'); }
 }
 
 /* ====================== AZIONI ====================== */
