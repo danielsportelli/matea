@@ -258,7 +258,7 @@
 /* ====================== DATI DI RIFERIMENTO ====================== */
 
 const STEPS=[
-  {id:'anag',t:'Anagrafica'},{id:'viso',t:'Forma del viso'},{id:'colori',t:'Armocromia'},
+  {id:'anag',t:'Anagrafica'},{id:'viso',t:'Forma del viso'},{id:'colori',t:'Colori'},
   {id:'asp',t:'Aspettative'},{id:'guida',t:'Linee guida'},{id:'prova',t:'Prova trucco'},{id:'riepilogo',t:'Riepilogo'}
 ];
 
@@ -604,30 +604,25 @@ function viewViso(){
 }
 function palette(arr){return `<div class="pal">${arr.map(([n,c])=>`<div class="sw"><i style="background:${c}"></i>${esc(n)}</div>`).join('')}</div>`;}
 const HOW={
- prep:['Prima di cominciare: come preparare l\'analisi',`<ul>
-  <li><b>Luce naturale</b>, vicino a una finestra, mai luce calda o led colorato.</li>
-  <li><b>Viso struccato</b> (o con trucco minimo), capelli raccolti e via dal viso, niente gioielli né occhiali colorati.</li>
-  <li>Una <b>mantella o telo bianco</b> sulle spalle, per non farsi influenzare dai vestiti.</li>
-  <li>Valutare sempre i <b>colori naturali</b>: capelli tinti o abbronzatura recente falsano il risultato. Guardare radici e sopracciglia.</li>
-  <li><b>Ordine</b>: prima sottotono, poi intensità, poi profondità. Ogni risposta si conferma con una prova colori vicino al viso.</li></ul>`],
- sotto:['Come riconoscere il sottotono',`<p>Il sottotono non è il colore della pelle: una pelle chiarissima può essere calda, una scura può essere fredda.</p><ul>
-  <li><b>Vene del polso</b> (luce naturale): verdi o olivastre = <b>caldo</b>; blu o viola = <b>freddo</b>; miste o indecise = <b>neutro</b>.</li>
-  <li><b>Oro o argento</b> accanto al viso: l'oro illumina = caldo; l'argento illumina = freddo; entrambi vanno bene = neutro.</li>
-  <li><b>Telo sotto il mento</b>: bianco puro (ottico) che fa bene = freddo; avorio o panna che fa bene = caldo.</li>
-  <li><b>Pesca/corallo oppure rosa/fucsia</b> vicino al viso: il primo valorizza = caldo; il secondo = freddo.</li>
-  <li><b>Indizi sul viso</b>: lentiggini color miele o ramate, riflessi dorati nei capelli = caldo. Rossori rosati o bluastri, ombre grigio-blu sotto gli occhi = freddo.</li>
-  <li><b>Sole</b> (indicativo): si abbronza dorata = caldo; si arrossa e abbronza poco = freddo.</li>
-  <li><b>Neutro</b>: nessun segnale prevale. Scegliere "neutro caldo" o "neutro freddo" in base a quale colore del telo dona di più.</li></ul>
-  <p><b>Attenzione:</b> rossori, couperose e abbronzatura ingannano. Il test più affidabile è il telo, confrontando due colori uno dopo l'altro.</p>`],
- croma:['Come riconoscere l\'intensità',`<p>Si valuta il <b>contrasto</b> tra pelle, capelli e occhi, e la <b>limpidezza</b> dei colori.</p><ul>
-  <li><b>Brillante</b>: contrasto netto (es. capelli scuri, pelle chiara, occhi vividi). Il bianco dell'occhio è limpido, l'iride ha un colore pulito e acceso. I colori puri e saturi (rosso, turchese, fucsia) stanno bene.</li>
-  <li><b>Morbido</b>: poco contrasto, tutto sulla stessa tonalità, sfumato. Occhi con colori misti e "polverosi" (nocciola, verde-grigio, castano). I colori attenuati (salvia, malva, cammello) stanno meglio.</li>
-  <li><b>Test del colore vivo</b>: avvicinare al viso un rosso o un fucsia puro. Se il colore "vince" sul viso e la persona sembra sparire = <b>morbido</b>. Se il viso si accende = <b>brillante</b>.</li></ul>`],
- prof:['Come riconoscere la profondità',`<p>Si guarda l'<b>insieme</b> di capelli naturali, occhi e pelle, non la sola pelle.</p><ul>
-  <li><b>Chiaro</b>: capelli biondi o castano chiaro, occhi chiari, pelle chiara. I colori scuri e pesanti "schiacciano" il viso.</li>
-  <li><b>Scuro</b>: capelli castano scuro o neri, occhi scuri, pelle da media a scura. I colori troppo pallidi la "spengono".</li>
-  <li><b>Medio</b>: via di mezzo, nessuno dei due estremi prevale.</li>
-  <li><b>Trucco utile</b>: una foto in bianco e nero del viso mostra subito se l'insieme è chiaro, medio o scuro.</li></ul>`],
+ prep:['Prima di cominciare',`<ul>
+  <li><b>Luce naturale</b> vicino a una finestra (o lampada diurna con resa del colore alta).</li>
+  <li><b>Viso struccato</b>, capelli raccolti, mantella bianca o grigia.</li>
+  <li>Conta il <b>colore naturale</b>: con i capelli tinti guarda radici e sopracciglia.</li>
+  <li><b>Ordine</b>: sottotono, intensità, profondità. Poi conferma con <b>rossetto e blush veri</b> vicino al viso.</li></ul>`],
+ sotto:['Come riconoscere il sottotono',`<ul>
+  <li><b>Vene del polso</b>: verdi = caldo, blu/viola = freddo, miste = neutro.</li>
+  <li><b>Oro o argento</b>: l'oro illumina = caldo, l'argento = freddo.</li>
+  <li><b>Telo sotto il mento</b>: bianco puro = freddo, avorio = caldo.</li>
+  <li><b>Pesca/corallo</b> = caldo, <b>rosa/fucsia</b> = freddo.</li>
+  <li><b>Neutro</b>: nessun segnale netto. Scegli neutro caldo o freddo in base al telo che dona di più.</li></ul>
+  <p><b>Attenzione:</b> rossori e abbronzatura ingannano.</p>`],
+ croma:['Come riconoscere l\'intensità',`<ul>
+  <li><b>Brillante</b>: contrasto netto tra pelle, capelli e occhi. I colori puri stanno bene.</li>
+  <li><b>Morbido</b>: pochi contrasti, tutto sfumato. Il colore vivo "mangia" il viso.</li>
+  <li><b>Test</b>: rosso o fucsia puro vicino al viso. Il viso si accende = brillante. Il colore vince sul viso = morbido.</li></ul>`],
+ prof:['Come riconoscere la profondità',`<ul>
+  <li>Guarda l'<b>insieme</b> di capelli naturali, occhi e pelle.</li>
+  <li><b>Chiaro</b>: biondo o castano chiaro, occhi chiari. <b>Scuro</b>: castano scuro o nero, occhi scuri. <b>Medio</b>: via di mezzo.</li></ul>`],
  sub:['Come scegliere la sottostagione',`<p>Ogni stagione ha <b>3 sottostagioni</b>: non esistono tutte e 5 le caratteristiche in ogni stagione. Si sceglie quella legata al <b>tratto dominante</b>, cioè la prima cosa che si nota della persona.</p><ul>
   <li><b>Primavera</b>: <b>chiara</b> (domina la luminosità) · <b>calda</b> (domina il calore dorato) · <b>brillante</b> (domina il contrasto vivo).</li>
   <li><b>Estate</b>: <b>chiara</b> (luminosità delicata) · <b>fredda</b> (domina il sottotono freddo) · <b>morbida</b> (poco contrasto, tutto sfumato).</li>
@@ -642,7 +637,7 @@ function how(id){
 }
 function viewColori(){
   const c=S.rec.colori; const season=seasonOf(c);
-  let h=H1('Armocromia','Osservate la pelle a luce naturale, senza trucco.')+
+  let h=H1('Colori per il trucco','Osservate la pelle a luce naturale, senza trucco: serve a scegliere i colori che la valorizzano.')+
   card('Preparazione',how('prep'))+
   card('Sottotono della pelle',chips('colori.sottotono',['Caldo','Neutro caldo','Neutro freddo','Freddo'])+'<div style="height:12px"></div>'+how('sotto'))+
   card('Intensità e contrasto',chips('colori.croma',['Morbido','Brillante'])+'<div style="height:12px"></div>'+how('croma'))+
@@ -650,15 +645,15 @@ function viewColori(){
   card('Colori naturali',field('Capelli','colori.capelli','text')+field('Occhi','colori.occhiCol','text'));
   if(season){
     const sug=c.profondita?SUGG[season][c.profondita.toLowerCase()]:null;
-    h+=card('Stagione e sottostagione',`<div class="season" style="margin-top:0"><span class="eyebrow">Stagione suggerita</span><b>${season}</b>${esc(SEASON_D[season])}</div>
-    <label class="f">Sottostagione</label><p class="hint">La proposta si basa sulla profondità. La scelta finale è di Giorgia.</p>${how('sub')}
+    h+=card('Famiglia di colori',`<div class="season" style="margin-top:0"><span class="eyebrow">Famiglia suggerita</span><b>${season}</b>${esc(SEASON_D[season])}</div>
+    <label class="f">Sfumatura</label><p class="hint">La proposta si basa sulla profondità. La scelta finale è di Giorgia.</p>${how('sub')}
     <div class="subs">${SUBS[season].map(([id,n],i)=>`<button type="button" class="sub${c.sub===id?' on':''}" data-chip="colori.sub" data-val="${id}"><b>${n}${sug===i?'<span class="tag">consigliata</span>':''}</b><span>${esc(SD[id].d)}</span></button>`).join('')}</div>`);
   }
   if(c.sub&&SD[c.sub]&&seasonOfSub(c.sub)===season){
     const d=SD[c.sub];
-    h+=card('Palette: '+subName(c.sub),`<span class="eyebrow">Occhi</span>${palette(d.occhi)}<span class="eyebrow">Labbra</span>${palette(d.labbra)}<span class="eyebrow">Blush</span>${palette(d.blush)}<p class="hint">Metalli e gioielli: ${esc(d.m)}.</p>`);
+    h+=card('Palette consigliata · '+subName(c.sub),`<span class="eyebrow">Occhi</span>${palette(d.occhi)}<span class="eyebrow">Labbra</span>${palette(d.labbra)}<span class="eyebrow">Blush</span>${palette(d.blush)}<p class="hint">Metalli e gioielli: ${esc(d.m)}.</p>`);
   }
-  return h+card('Note armocromia',area('','colori.note',''));
+  return h+card('Scelta con la cliente',area('Colori che piacciono alla cliente','colori.gusti','es. toni caldi, rosa, niente rosso')+area('Colori scelti per il trucco','colori.scelti','es. occhi bronzo, labbra terracotta, blush pesca'))+card('Note',area('','colori.note',''));
 }
 function viewAsp(){
   return H1('Aspettative','Che trucco si immagina la cliente?')+
@@ -701,7 +696,7 @@ function viewRiep(){
   <div class="stack" id="pdfbox" style="margin-bottom:8px">${S.pdf&&S.pdf.id===r.id?pdfButtons():`<button class="btn" data-act="pdf">Genera PDF</button>`}</div>`+
   sec('Anagrafica',dl([['Tipo evento',a.occasione],['Email',a.email],['Telefono',a.tel],[a.occasione==='Sposa'?'Data nozze':'Data',a.dataEvento],['Luogo del trucco',a.luogo],['Orario',orario(a)],['Note',a.note]]))+
   sec('Viso',dl([['Forma',v.forma&&FACES[v.forma].n],['Pelle',v.pelle],['Occhi',v.occhi],['Labbra',v.labbra],['Note',v.note]]))+
-  sec('Armocromia',dl([['Sottotono',c.sottotono],['Intensità',c.croma],['Profondità',c.profondita],['Capelli',c.capelli],['Occhi',c.occhiCol],['Stagione',c.sub&&subName(c.sub)],['Note',c.note]])+(d?palette([...d.occhi,...d.labbra,...d.blush]):''))+
+  sec('Colori per il trucco',dl([['Sottotono',c.sottotono],['Intensità',c.croma],['Profondità',c.profondita],['Capelli',c.capelli],['Occhi',c.occhiCol],['Famiglia',c.sub&&subName(c.sub)]])+(d?palette([...d.occhi,...d.labbra,...d.blush]):'')+dl([['Piacciono alla cliente',c.gusti],['Scelti per il trucco',c.scelti],['Note',c.note]]))+
   sec('Aspettative',dl([['Stile',s.stili],['Finish',s.finish],['Occhi',s.occhi],['Labbra',s.labbra],['Resistenza',s.resa],['Riferimenti',s.rif],['Da evitare',s.evitare],['Allergie',s.allergie]]))+
   sec('Prova trucco',(steps.length?`<dl>${steps.map(x=>`<dt>${esc(x.nome)}</dt><dd>${esc(x.note)}</dd>`).join('')}</dl>`:'')+dl([['Note',p.note],['Per il giorno',p.giorno]]))+
   (r.photos.length?card('Foto',`<div class="photos" style="margin-top:0">${r.photos.map(f=>`<div class="ph"><img src="${f.data}" alt=""><div class="muted" style="margin-top:6px">${esc(f.label)}</div></div>`).join('')}</div>`):'');
@@ -934,8 +929,8 @@ async function buildPdf(r){
   y=Math.max(ya,yb)+2;
 
   doc.setDrawColor(225,220,212); doc.setLineWidth(.3); doc.line(M,y,W-M,y); y+=9;
-  y=titleAt(M,y,'Armocromia');
-  const arr=[['Sottotono',c.sottotono],['Intensita',c.croma],['Profondita',c.profondita],['Capelli',c.capelli],['Occhi',c.occhiCol],['Stagione',c.sub&&subName(c.sub)]];
+  y=titleAt(M,y,'Colori per il trucco');
+  const arr=[['Sottotono',c.sottotono],['Intensita',c.croma],['Profondita',c.profondita],['Capelli',c.capelli],['Occhi',c.occhiCol],['Famiglia',c.sub&&subName(c.sub)]];
   for(let row=0;row<2;row++){ let ym=y; for(let i=0;i<3;i++){ const yy=itemsAt(M+i*(g3+8),g3,y,[arr[row*3+i]]); ym=Math.max(ym,yy); } y=ym; }
   if(d){
     y+=1; doc.setFont('times','italic'); doc.setFontSize(12); doc.setTextColor(...CH);
@@ -948,7 +943,7 @@ async function buildPdf(r){
     });
     y+=4+13*3;
   }
-  kv('Note armocromia',c.note);
+  kv('Piacciono alla cliente',c.gusti); kv('Scelti per il trucco',c.scelti); kv('Note',c.note);
 
   /* ---------- PAGINA 2: aspettative + linee guida ---------- */
   np();
