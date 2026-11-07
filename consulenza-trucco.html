@@ -163,10 +163,11 @@
   .toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:calc(var(--safe-bottom) + 90px); background:var(--charcoal); color:#fff; padding:12px 18px; border-radius:2px; font-size:14px; z-index:50; max-width:90%; }
   /* pannelli (card solo bordo) */
   .panel{ border:1px solid var(--beige); border-radius:2px; padding:22px 18px 8px; margin-top:28px; }
-  .panel > h2{ margin:0 0 16px; font-weight:700; font-size:30px; line-height:1.15; letter-spacing:.005em; }
+  .panel > h2{ margin:0 0 16px; font-weight:700; font-size:26px; line-height:1.15; letter-spacing:.005em; }
   .panel.form{ padding-bottom:22px; margin-top:18px; }
   .panel.form > h2 + label.f, .panel.form > h2 + p.hint{ margin-top:0; }
-  h1.stepT{ font-weight:700; font-size:clamp(34px,10vw,42px); line-height:1.12; margin-bottom:10px; }
+  h1.stepT{ font-weight:500; font-size:clamp(38px,11.5vw,46px); line-height:1.06; letter-spacing:-.005em; margin-bottom:12px; }
+  .rule{ display:block; width:46px; height:2px; background:var(--gold); margin:0 0 18px; }
   h1.big{ font-weight:700; }
   .panel .pstep{ background:transparent; border:0; border-bottom:1px solid var(--beige); border-radius:0; padding:12px 0; margin:0; }
   .panel .pstep:last-of-type{ border-bottom:0; }
@@ -571,7 +572,7 @@ function viewHome(){
   <div id="clist" style="margin-top:16px">${homeList()}</div></section>`;
 }
 
-const H1=(t,lead)=>`<h1 class="stepT"><span class="hl">${t}</span></h1>${lead?`<p class="lead">${lead}</p>`:''}`;
+const H1=(t,lead)=>`<h1 class="stepT">${t}</h1><span class="rule"></span>${lead?`<p class="lead">${lead}</p>`:''}`;
 const card=(title,body,cls)=>`<section class="panel form${cls?' '+cls:''}"><h2><span class="hl">${title}</span></h2>${body}</section>`;
 function viewAnag(){
   const a=S.rec.anag, sposa=a.occasione==='Sposa';
@@ -590,7 +591,7 @@ function viewAnag(){
 function viewViso(){
   const k=S.rec.viso.forma; const f=k&&FACES[k];
   return H1('Forma del viso','Guardate insieme le geometrie e scegliete quella più vicina al viso della cliente.')+
-  card('Forma del viso',`<div class="faces">${FACE_ORDER.map(x=>`<button type="button" class="face${k===x?' on':''}" data-chip="viso.forma" data-val="${x}">${faceSvg(x,false)}<span class="fn">${FACES[x].n}</span></button>`).join('')}</div>
+  card('Scegli la forma',`<div class="faces">${FACE_ORDER.map(x=>`<button type="button" class="face${k===x?' on':''}" data-chip="viso.forma" data-val="${x}">${faceSvg(x,false)}<span class="fn">${FACES[x].n}</span></button>`).join('')}</div>
   ${f?`<div class="shapeinfo"><b>${f.n}</b>${esc(f.d)}</div>`:''}`)+
   card('Pelle, occhi e labbra',`<label class="f">Tipo di pelle</label>${chips('viso.pelle',['Secca','Mista','Grassa','Sensibile','Matura','Rossori / couperose','Imperfezioni'],1)}
   <label class="f">Forma degli occhi</label>${chips('viso.occhi',['Mandorla','Tondi','Incappucciati','Ravvicinati','Distanziati','All\'ingiù','All\'insù','Piccoli','Grandi'],1)}
@@ -670,7 +671,7 @@ function viewGuida(){
   const f=FACES[k], g=f.g, c=S.rec.colori, d=c.sub&&SD[c.sub];
   return H1('Viso '+f.n.toLowerCase(),'Guida per costruire la fisionomia più armonica. Indicazioni di base: la valutazione finale è di Giorgia.')+
   card('Schema',`<div class="diagram" style="border:0;padding:0">${faceSvg(k,true)}<div class="legend"><span><i style="background:#C9B37E"></i>Luce</span><span><i style="background:#7d6657"></i>Contouring</span><span><i style="background:#D9847C"></i>Blush</span></div></div>`)+
-  card('Linee guida',`<dl class="guide" style="margin-top:-8px"><dt>Obiettivo</dt><dd>${esc(g.obiettivo)}</dd><dt>Contouring</dt><dd>${esc(g.contouring)}</dd><dt>Blush</dt><dd>${esc(g.blush)}</dd><dt>Punti luce</dt><dd>${esc(g.luce)}</dd><dt>In più</dt><dd>${esc(g.extra)}</dd></dl>`)+
+  card('Consigli',`<dl class="guide" style="margin-top:-8px"><dt>Obiettivo</dt><dd>${esc(g.obiettivo)}</dd><dt>Contouring</dt><dd>${esc(g.contouring)}</dd><dt>Blush</dt><dd>${esc(g.blush)}</dd><dt>Punti luce</dt><dd>${esc(g.luce)}</dd><dt>In più</dt><dd>${esc(g.extra)}</dd></dl>`)+
   (d?card('Colori · '+subName(c.sub),palette([...d.occhi,...d.labbra,...d.blush])):'');
 }
 function viewProva(){
@@ -691,7 +692,7 @@ function viewRiep(){
   const r=S.rec,a=r.anag,v=r.viso,c=r.colori,s=r.asp,p=r.prova,d=c.sub&&SD[c.sub];
   const steps=p.steps.filter(x=>x.note.trim());
   const sec=(t,b)=>b.replace(/<dl><\/dl>/g,'').trim()?card(t,`<div class="sum">${b}</div>`):'';
-  return `<h1 class="stepT" style="margin-bottom:8px"><span class="hl">${esc(fullName(r))}</span></h1><p class="lead" style="margin-bottom:18px"><b>Giorno della prova trucco:</b> ${esc(provaDay(r))}</p>
+  return `<h1 class="stepT" style="margin-bottom:12px">${esc(fullName(r))}</h1><span class="rule"></span><p class="lead" style="margin-bottom:18px"><b>Giorno della prova trucco:</b> ${esc(provaDay(r))}</p>
   <div style="margin:0 0 20px;display:flex;align-items:center;gap:10px"><span class="muted">Stato</span>${stChip(r,1)}</div>${tagsHtml(r)?`<div style="margin:-8px 0 18px">${tagsHtml(r)}</div>`:''}
   <div class="stack" id="pdfbox" style="margin-bottom:8px">${S.pdf&&S.pdf.id===r.id?pdfButtons():`<button class="btn" data-act="pdf">Genera PDF</button>`}</div>`+
   sec('Anagrafica',dl([['Tipo evento',a.occasione],['Email',a.email],['Telefono',a.tel],[a.occasione==='Sposa'?'Data nozze':'Data',a.dataEvento],['Luogo del trucco',a.luogo],['Orario',orario(a)],['Note',a.note]]))+
