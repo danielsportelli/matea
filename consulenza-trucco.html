@@ -584,6 +584,10 @@ function viewAnag(){
   const a=S.rec.anag, sposa=a.occasione==='Sposa';
   return H1('Chi è la cliente','Contatti, prova e dettagli dell\'evento.')+
   card('Contatti',field('Nome','anag.nome','text')+field('Cognome','anag.cognome','text')+field('Email','anag.email','email')+field('Telefono','anag.tel','tel'))+
+  card('Foto della cliente',`<p class="hint" style="margin-top:0">Foto iniziale, a viso struccato e con luce naturale.</p>
+  <div class="stack"><label class="btn sage" style="cursor:pointer">Scatta una foto<input type="file" class="phin" data-label="Prima" accept="image/*" capture="environment"></label>
+  <label class="btn ghost" style="cursor:pointer">Scegli dalla galleria<input type="file" class="phin" data-label="Prima" accept="image/*" multiple></label></div>
+  ${S.rec.photos.filter(f=>f.label==='Prima').length?`<div class="photos">${S.rec.photos.filter(f=>f.label==='Prima').map(f=>`<div class="ph"><img src="${f.data}" alt=""><button class="del" data-pdel="${f.id}">Elimina</button></div>`).join('')}</div>`:''}`)+
   card('Prova trucco',`<div class="row" style="align-items:flex-start"><div class="grow" style="flex:1.15">${field('Giorno','anag.dataProva','date')}</div><div class="grow">${field('Ora','anag.oraProva','time')}</div></div>`)+
   card('Evento',`<label class="f">Tipo di evento</label>${chips('anag.occasione',['Sposa','Cerimonia','Serata / evento','Servizio foto','Quotidiano','Altro'])}
   ${field(sposa?'Data delle nozze':'Data del trucco','anag.dataEvento','date')}
@@ -660,7 +664,9 @@ function viewColori(){
   <label class="f">Abbronzatura prevista</label>${chips('colori.abb',['Nessuna','Leggera','Intensa'])}
   <label class="f">Colore dei capelli</label>${chips('colori.capCambio',['Resta così','Cambierà'])}
   ${cn.capCambio==='Cambierà'?field('Nuovo colore previsto','colori.capNuovi','text','es. più chiaro, biondo, rossiccio'):''}
-  ${field('Fondotinta usato alla prova','colori.fondoOggi','text','marca e tonalità')}`);
+  ${cn.abb==='Leggera'||cn.abb==='Intensa'?`<div class="season" style="background:#F5EDD6;margin:16px 0 0"><b style="font-size:20px">Attenzione all'abbronzatura</b>La prova su pelle più chiara non rappresenta il risultato finale: cambiano fondotinta, blush e contouring. Prova con la <b>tonalità attesa</b> (mix o bronzer) oppure programma un <b>controllo prima dell'evento</b>.</div>`:''}
+  ${field('Fondotinta usato alla prova','colori.fondoOggi','text','marca e tonalità')}
+  ${field('Fondotinta previsto per il giorno','colori.fondoStima','text','se la pelle sarà più abbronzata')}`);
   return h+card('Scelta con la cliente',area('Colori che piacciono alla cliente','colori.gusti','es. toni caldi, rosa, niente rosso')+area('Colori scelti per il trucco','colori.scelti','es. occhi bronzo, labbra terracotta, blush pesca'))+card('Note',area('','colori.note',''));
 }
 function viewAsp(){
@@ -704,7 +710,7 @@ function viewRiep(){
   <div class="stack" id="pdfbox" style="margin-bottom:8px">${S.pdf&&S.pdf.id===r.id?pdfButtons():`<button class="btn" data-act="pdf">Genera PDF</button>`}</div>`+
   sec('Anagrafica',dl([['Tipo evento',a.occasione],['Email',a.email],['Telefono',a.tel],[a.occasione==='Sposa'?'Data nozze':'Data',a.dataEvento],['Luogo del trucco',a.luogo],['Orario',orario(a)],['Note',a.note]]))+
   sec('Viso',dl([['Forma',v.forma&&FACES[v.forma].n],['Pelle',v.pelle],['Occhi',v.occhi],['Labbra',v.labbra],['Note',v.note]]))+
-  sec('Colori per il trucco',dl([['Sottotono',c.sottotono],['Intensità',c.croma],['Profondità',c.profondita],['Capelli',c.capelli],['Occhi',c.occhiCol],['Famiglia',c.sub&&subName(c.sub)]])+(d?palette([...d.occhi,...d.labbra,...d.blush]):'')+dl([['Piacciono alla cliente',c.gusti],['Scelti per il trucco',c.scelti],['Abbronzatura prevista',c.abb],['Capelli',c.capCambio==='Cambierà'?'Cambierà'+(c.capNuovi?': '+c.capNuovi:''):c.capCambio],['Fondotinta alla prova',c.fondoOggi],['Note',c.note]]))+
+  sec('Colori per il trucco',dl([['Sottotono',c.sottotono],['Intensità',c.croma],['Profondità',c.profondita],['Capelli',c.capelli],['Occhi',c.occhiCol],['Famiglia',c.sub&&subName(c.sub)]])+(d?palette([...d.occhi,...d.labbra,...d.blush]):'')+dl([['Piacciono alla cliente',c.gusti],['Scelti per il trucco',c.scelti],['Abbronzatura prevista',c.abb],['Capelli',c.capCambio==='Cambierà'?'Cambierà'+(c.capNuovi?': '+c.capNuovi:''):c.capCambio],['Fondotinta alla prova',c.fondoOggi],['Fondotinta previsto per il giorno',c.fondoStima],['Note',c.note]]))+
   sec('Aspettative',dl([['Stile',s.stili],['Finish',s.finish],['Occhi',s.occhi],['Labbra',s.labbra],['Resistenza',s.resa],['Riferimenti',s.rif],['Da evitare',s.evitare],['Allergie',s.allergie]]))+
   sec('Prova trucco',(steps.length?`<dl>${steps.map(x=>`<dt>${esc(x.nome)}</dt><dd>${esc(x.note)}</dd>`).join('')}</dl>`:'')+dl([['Note',p.note],['Per il giorno',p.giorno]]))+
   (r.photos.length?card('Foto',`<div class="photos" style="margin-top:0">${r.photos.map(f=>`<div class="ph"><img src="${f.data}" alt=""><div class="muted" style="margin-top:6px">${esc(f.label)}</div></div>`).join('')}</div>`):'');
@@ -861,7 +867,7 @@ document.addEventListener('change',async e=>{
   if(t.hasAttribute('data-dd')){ S.sheet.draft.dataEvento=t.value; renderSheet(); }
   else if(t.id==='periodo'){ S.periodo=t.value; $('#agenda').innerHTML=agendaHtml(); }
   else if(t.dataset.plabel){ const f=S.rec.photos.find(x=>x.id===t.dataset.plabel); if(f){f.label=t.value; touch();} }
-  else if(t.classList.contains('phin')){ const files=[...t.files]; t.value=''; if(!files.length) return; let ok=0; for(const f of files){ try{ S.rec.photos.push({id:uid(),label:'Prova',data:await shrink(f)}); ok++; }catch(_){ toast('Foto non leggibile (formato non supportato?)'); } } if(ok){ touch(); await saveNow(); render(true); toast(ok+(ok>1?' foto aggiunte':' foto aggiunta')); } }
+  else if(t.classList.contains('phin')){ const files=[...t.files]; t.value=''; if(!files.length) return; let ok=0; for(const f of files){ try{ S.rec.photos.push({id:uid(),label:t.dataset.label||'Prova',data:await shrink(f)}); ok++; }catch(_){ toast('Foto non leggibile (formato non supportato?)'); } } if(ok){ touch(); await saveNow(); render(true); toast(ok+(ok>1?' foto aggiunte':' foto aggiunta')); } }
 });
 
 /* ---------- foto: ridimensiona per risparmiare spazio ---------- */
@@ -951,7 +957,7 @@ async function buildPdf(r){
     });
     y+=4+13*3;
   }
-  kv('Piacciono alla cliente',c.gusti); kv('Scelti per il trucco',c.scelti); kv('Abbronzatura prevista',c.abb); kv('Capelli fino all\'evento',c.capCambio==='Cambierà'?'Cambierà'+(c.capNuovi?': '+c.capNuovi:''):c.capCambio); kv('Fondotinta alla prova',c.fondoOggi); kv('Note',c.note);
+  kv('Piacciono alla cliente',c.gusti); kv('Scelti per il trucco',c.scelti); kv('Abbronzatura prevista',c.abb); kv('Capelli fino all\'evento',c.capCambio==='Cambierà'?'Cambierà'+(c.capNuovi?': '+c.capNuovi:''):c.capCambio); kv('Fondotinta alla prova',c.fondoOggi); kv('Fondotinta previsto per il giorno',c.fondoStima); kv('Note',c.note);
 
   /* ---------- PAGINA 2: aspettative + linee guida ---------- */
   np();
