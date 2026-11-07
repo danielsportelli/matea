@@ -177,4 +177,6 @@ Il servizio usa i colori **per il trucco**, non per l'abbigliamento: il kit può
 
 ## Come proporre una modifica
 
+Ogni modifica richiesta viene portata direttamente sul branch principale (`main`), quindi il file ufficiale è sempre aggiornato.
+
 Il flusso, i testi e i colori sono tutti in `consulenza-trucco.html`. Per le modifiche ai contenuti (testi delle guide, palette, stati) basta indicare cosa cambiare e dove compare nell'app.
