@@ -105,6 +105,9 @@ Per ora **solo nel browser del dispositivo** (IndexedDB, database `matea-consule
 - Un solo file HTML con CSS e JavaScript inclusi, senza framework.
 - Mobile-first: `viewport-fit=cover`, **safe area generose** in alto e in basso (notch/dynamic island/barra home e barra gesti Android), campi a 16 px (niente zoom automatico su iPhone), pulsanti ad almeno 44 px.
 - Campi principali di una scheda: `anag` (contatti, date, luogo, orari), `viso`, `colori`, `asp`, `prova` (passaggi e note), `photos`, `stato`, `fase` (prova fatta / confermato / fatto), `pag` (prova e saldo incassati). Lo `stato` è derivato dalle fasi e alimenta agenda e filtri.
+- **Testo non selezionabile né copiabile** (tranne dentro i campi di inserimento), menu contestuale e trascinamento delle immagini disattivati. È una comodità d'uso, non una protezione: chi ha accesso alla pagina può comunque leggerne il codice.
+- **Cellulare a 10 cifre**, senza prefisso: il campo accetta solo cifre, ne permette al massimo 10 e mostra "Servono 10 cifre (n/10)"; il pannello di creazione non salva con un numero incompleto. **Email**: controllo del formato con avviso "Controlla l'indirizzo email".
+- Il marchio si scrive **MATéA** (lettere maiuscole con la é accentata minuscola), come nel logo del sito.
 - I contenuti tecnici (linee guida per forma del viso, palette delle sottostagioni, guide a tendina) sono in oggetti dentro lo script (`FACES`, `SD`, `HOW`) e sono facili da correggere.
 - Testato in un browser headless con viewport da iPhone: flussi, agenda, PDF. **Non è stato provato su un telefono vero.**
 
