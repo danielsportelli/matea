@@ -1,0 +1,75 @@
+/* =========================================================
+   Matéa — livello UI condiviso (titoli, evidenziatore, card)
+   Caricato dopo lo <style> di ogni pagina, così lo completa.
+   Stesso linguaggio visivo dell'app interna di consulenza.
+   ========================================================= */
+
+/* Evidenziatore salvia dietro i titoli di sezione */
+.hl{
+  background:linear-gradient(transparent 58%, rgba(138,155,140,.42) 58%);
+  padding:0 .1em; margin:0 -.1em;
+  -webkit-box-decoration-break:clone; box-decoration-break:clone;
+}
+
+/* Gerarchia dei titoli: H2 e H3 in bold, H1 elegante con filetto oro */
+h2, .section-head h2, .prose h2, .founder h2, .cta-final h2{ font-weight:700; }
+.card h3, .metodo-step h3, .mini-cta h3{ font-weight:700; }
+.page-hero h1::after{
+  content:""; display:block; width:48px; height:2px; background:var(--gold); margin:24px auto 0;
+}
+
+/* Card informative (testo lungo suddiviso in blocchi) */
+.info-card{
+  background:#fff; border:1px solid var(--beige); border-radius:3px;
+  padding:28px 30px; margin-bottom:20px;
+}
+.info-card h2{ margin:0 0 14px; font-size:clamp(22px,3vw,28px); }
+.info-card h3{ font-size:24px; font-weight:700; margin:0 0 12px; }
+.info-card p:last-child{ margin-bottom:0; }
+.info-card ul{ margin-bottom:0; }
+.info-grid{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.info-grid .info-card{ margin-bottom:0; }
+
+/* Le cinque fasi: una card per fase */
+.metodo-steps{ counter-reset:fase; }
+.metodo-step{
+  background:#fff; border:1px solid var(--beige); border-radius:3px; padding:24px 18px 22px;
+}
+@media (min-width:861px){
+  .metodo-step{ margin:0 6px; }
+}
+
+/* Le tecnologie: una card per tecnologia, titolo nello stile del sito */
+.prose .tech-item{
+  background:#fff; border:1px solid var(--beige); border-radius:3px; padding:26px 28px;
+}
+.prose .tech-item h3{
+  font-family:'Cormorant Garamond', serif; font-size:24px; font-weight:700; margin-bottom:10px;
+}
+
+/* Fa per te / Non fa per te: titolo vero al posto dell'etichetta */
+.card .card-title{ font-size:26px; font-weight:700; margin:0 0 16px; line-height:1.2; }
+
+.prose .tech-item{ min-width:0; }
+.prose .tech-item > div:last-child{ min-width:0; }
+.prose .tech-item h3{ overflow-wrap:anywhere; }
+
+/* Domande frequenti dentro una card */
+.faq{ background:#fff; border:1px solid var(--beige); border-radius:3px; padding:4px 28px; }
+.faq .faq-item:last-child{ border-bottom:0; }
+
+@media (max-width:860px){
+  .info-grid{ grid-template-columns:1fr; }
+  .info-card{ padding:24px 22px; }
+  .metodo-steps{ gap:12px; }
+  .metodo-step{ padding:20px 20px 18px; }
+  .metodo-step h3{ display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+  .metodo-step h3::before{
+    counter-increment:fase; content:counter(fase);
+    flex:0 0 28px; height:28px; border-radius:50%; background:var(--tint-sage); color:var(--sage);
+    font:700 13px 'Manrope', sans-serif; display:flex; align-items:center; justify-content:center;
+  }
+  .prose .tech-item{ padding:22px 18px; gap:14px; }
+  .prose .tech-item h3{ font-size:21px; }
+  .faq{ padding:2px 20px; }
+}
