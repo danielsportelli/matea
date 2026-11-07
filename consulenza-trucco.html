@@ -489,7 +489,7 @@ function payTags(r){ const st=stId(r), p=r.pag||{}, t=[]; if(st==='annullato') r
   if(['attesa','confermato','concluso'].includes(st)&&!p.prova) t.push('Prova da incassare');
   if(st==='concluso'&&!p.saldo) t.push('Saldo da incassare'); return t; }
 const isClosed=r=>stId(r)==='concluso'&&r.pag&&r.pag.prova&&r.pag.saldo;
-function recheck(r){ const c=r.colori||{}; if(stId(r)!=='confermato'||!r.anag.dataEvento) return false; const d=daysFrom(r.anag.dataEvento); if(d<0||d>30) return false; return c.abb==='Leggera'||c.abb==='Intensa'||c.capCambio==='Cambierà'; }
+function recheck(r){ const c=r.colori||{}; if(stId(r)!=='confermato'||!r.anag.dataEvento) return false; const d=daysFrom(r.anag.dataEvento); if(d<0||d>30) return false; return c.abb==='Leggera'||c.abb==='Intensa'||c.capCambio==='Cambierà'||c.sopr==='Più chiare'||c.sopr==='Più scure'; }
 const RECH='<span class="ptag" style="background:#E8EEE8;color:#3f5242" title="Ricontrolla i colori prima dell\'evento">↻ Ricontrolla colori</span>';
 const tagSpans=r=>payTags(r).map(x=>`<span class="ptag" title="${x}">€ ${x.startsWith('Prova')?'Prova':'Saldo'}</span>`).join('')+(isClosed(r)?'<span class="ptag ok">✓ Chiusa</span>':'')+(recheck(r)?RECH:'');
 const tagsHtml=r=>{ const t=payTags(r).map(x=>`<span class="ptag">€ ${x}</span>`).join(''); return (t||isClosed(r)||recheck(r))?`<div class="tags">${t}${isClosed(r)?'<span class="ptag ok">✓ Chiusa</span>':''}${recheck(r)?RECH:''}</div>`:''; };
@@ -660,11 +660,12 @@ function viewColori(){
     h+=card('Palette consigliata · '+subName(c.sub),`<span class="eyebrow">Occhi</span>${palette(d.occhi)}<span class="eyebrow">Labbra</span>${palette(d.labbra)}<span class="eyebrow">Blush</span>${palette(d.blush)}<p class="hint">Metalli e gioielli: ${esc(d.m)}.</p>`);
   }
   const cn=S.rec.colori;
-  h+=card('Fino all\'evento',`<p class="hint" style="margin-top:0">Se tra la prova e l'evento cambiano abbronzatura o capelli, il giorno si ricontrolla: la scheda mostrerà un promemoria 30 giorni prima.</p>
+  h+=card('Fino all\'evento',`<p class="hint" style="margin-top:0">Il trucco si decide su come sarà la cliente il giorno dell'evento. Se cambiano abbronzatura o capelli, la scheda mostrerà un promemoria 30 giorni prima.</p>
   <label class="f">Abbronzatura prevista</label>${chips('colori.abb',['Nessuna','Leggera','Intensa'])}
   <label class="f">Colore dei capelli</label>${chips('colori.capCambio',['Resta così','Cambierà'])}
-  ${cn.capCambio==='Cambierà'?field('Nuovo colore previsto','colori.capNuovi','text','es. più chiaro, biondo, rossiccio'):''}
-  ${cn.abb==='Leggera'||cn.abb==='Intensa'?`<div class="season" style="background:#F5EDD6;margin:16px 0 0"><b style="font-size:20px">Attenzione all'abbronzatura</b>La prova su pelle più chiara non rappresenta il risultato finale: cambiano fondotinta, blush e contouring. Prova con la <b>tonalità attesa</b> (mix o bronzer) oppure programma un <b>controllo prima dell'evento</b>.</div>`:''}
+  ${cn.capCambio==='Cambierà'?field('Nuovo colore previsto','colori.capNuovi','text','es. più chiaro, biondo, rossiccio')+'<p class="hint" style="margin-top:8px">Il sottotono si valuta sul colore naturale (con la fascia), ma intensità di occhi, labbra e sopracciglia vanno pensate sul colore previsto. Se puoi, chiedi una foto di riferimento.</p>':''}
+  <label class="f">Sopracciglia previste</label>${chips('colori.sopr',['Invariate','Più chiare','Più scure'])}
+  ${cn.abb==='Leggera'||cn.abb==='Intensa'?`<div class="season" style="background:#F5EDD6;margin:16px 0 0"><b style="font-size:20px">Attenzione all'abbronzatura</b>La prova su pelle più chiara non rappresenta il risultato finale. Per simulare la carnagione prevista usa un <b>fondotinta più scuro</b> o una <b>terra</b> su viso e collo, segna le due tonalità e prevedi un <b>controllo prima dell'evento</b>.</div>`:''}
   ${field('Fondotinta usato alla prova','colori.fondoOggi','text','marca e tonalità')}
   ${field('Fondotinta previsto per il giorno','colori.fondoStima','text','se la pelle sarà più abbronzata')}`);
   return h+card('Scelta con la cliente',area('Colori che piacciono alla cliente','colori.gusti','es. toni caldi, rosa, niente rosso')+area('Colori scelti per il trucco','colori.scelti','es. occhi bronzo, labbra terracotta, blush pesca'))+card('Note',area('','colori.note',''));
@@ -676,6 +677,9 @@ function viewAsp(){
   <label class="f">Intensità occhi</label>${chips('asp.occhi',['Delicata','Media','Intensa'])}
   <label class="f">Labbra</label>${chips('asp.labbra',['Nude','Rosa','Corallo','Rosso','Scure / bordeaux','Lucide'])}`)+
   card('Resistenza',chips('asp.resa',['Resistente alle lacrime','Lunga durata','Ritocchi in giornata'],1))+
+  card('Abito',`<p class="hint" style="margin-top:0">Serve solo ad armonizzare il trucco (occhi e labbra), non a consigliare l'abbigliamento.</p>
+  ${S.rec.anag.occasione==='Sposa'?`<label class="f">Colore dell'abito</label>${chips('asp.abito',['Bianco','Avorio / panna','Champagne / nude','Colorato'])}`:''}
+  ${field(S.rec.anag.occasione==='Sposa'?'Dettagli (scollatura, velo, accessori)':'Colore dell\'abito (se già deciso)','asp.abitoNote','text','es. lilla, nero, scollatura a barca')}`)+
   card('Dettagli',area('Riferimenti / ispirazioni','asp.rif','Descrivi il look o incolla un link')+area('Da evitare','asp.evitare','')+field('Allergie / intolleranze','asp.allergie','text'));
 }
 function viewGuida(){
@@ -710,8 +714,8 @@ function viewRiep(){
   <div class="stack" id="pdfbox" style="margin-bottom:8px">${S.pdf&&S.pdf.id===r.id?pdfButtons():`<button class="btn" data-act="pdf">Genera PDF</button>`}</div>`+
   sec('Anagrafica',dl([['Tipo evento',a.occasione],['Email',a.email],['Telefono',a.tel],[a.occasione==='Sposa'?'Data nozze':'Data',a.dataEvento],['Luogo del trucco',a.luogo],['Orario',orario(a)],['Note',a.note]]))+
   sec('Viso',dl([['Forma',v.forma&&FACES[v.forma].n],['Pelle',v.pelle],['Occhi',v.occhi],['Labbra',v.labbra],['Note',v.note]]))+
-  sec('Colori per il trucco',dl([['Sottotono',c.sottotono],['Intensità',c.croma],['Profondità',c.profondita],['Capelli',c.capelli],['Occhi',c.occhiCol],['Famiglia',c.sub&&subName(c.sub)]])+(d?palette([...d.occhi,...d.labbra,...d.blush]):'')+dl([['Piacciono alla cliente',c.gusti],['Scelti per il trucco',c.scelti],['Abbronzatura prevista',c.abb],['Capelli',c.capCambio==='Cambierà'?'Cambierà'+(c.capNuovi?': '+c.capNuovi:''):c.capCambio],['Fondotinta alla prova',c.fondoOggi],['Fondotinta previsto per il giorno',c.fondoStima],['Note',c.note]]))+
-  sec('Aspettative',dl([['Stile',s.stili],['Finish',s.finish],['Occhi',s.occhi],['Labbra',s.labbra],['Resistenza',s.resa],['Riferimenti',s.rif],['Da evitare',s.evitare],['Allergie',s.allergie]]))+
+  sec('Colori per il trucco',dl([['Sottotono',c.sottotono],['Intensità',c.croma],['Profondità',c.profondita],['Capelli',c.capelli],['Occhi',c.occhiCol],['Famiglia',c.sub&&subName(c.sub)]])+(d?palette([...d.occhi,...d.labbra,...d.blush]):'')+dl([['Piacciono alla cliente',c.gusti],['Scelti per il trucco',c.scelti],['Abbronzatura prevista',c.abb],['Capelli',c.capCambio==='Cambierà'?'Cambierà'+(c.capNuovi?': '+c.capNuovi:''):c.capCambio],['Sopracciglia previste',c.sopr],['Fondotinta alla prova',c.fondoOggi],['Fondotinta previsto per il giorno',c.fondoStima],['Note',c.note]]))+
+  sec('Aspettative',dl([['Stile',s.stili],['Finish',s.finish],['Occhi',s.occhi],['Labbra',s.labbra],['Resistenza',s.resa],['Abito',[s.abito,s.abitoNote].filter(Boolean).join(' · ')],['Riferimenti',s.rif],['Da evitare',s.evitare],['Allergie',s.allergie]]))+
   sec('Prova trucco',(steps.length?`<dl>${steps.map(x=>`<dt>${esc(x.nome)}</dt><dd>${esc(x.note)}</dd>`).join('')}</dl>`:'')+dl([['Note',p.note],['Per il giorno',p.giorno]]))+
   (r.photos.length?card('Foto',`<div class="photos" style="margin-top:0">${r.photos.map(f=>`<div class="ph"><img src="${f.data}" alt=""><div class="muted" style="margin-top:6px">${esc(f.label)}</div></div>`).join('')}</div>`):'');
 }
@@ -957,13 +961,13 @@ async function buildPdf(r){
     });
     y+=4+13*3;
   }
-  kv('Piacciono alla cliente',c.gusti); kv('Scelti per il trucco',c.scelti); kv('Abbronzatura prevista',c.abb); kv('Capelli fino all\'evento',c.capCambio==='Cambierà'?'Cambierà'+(c.capNuovi?': '+c.capNuovi:''):c.capCambio); kv('Fondotinta alla prova',c.fondoOggi); kv('Fondotinta previsto per il giorno',c.fondoStima); kv('Note',c.note);
+  kv('Piacciono alla cliente',c.gusti); kv('Scelti per il trucco',c.scelti); kv('Abbronzatura prevista',c.abb); kv('Capelli fino all\'evento',c.capCambio==='Cambierà'?'Cambierà'+(c.capNuovi?': '+c.capNuovi:''):c.capCambio); kv('Sopracciglia previste',c.sopr); kv('Fondotinta alla prova',c.fondoOggi); kv('Fondotinta previsto per il giorno',c.fondoStima); kv('Note',c.note);
 
   /* ---------- PAGINA 2: aspettative + linee guida ---------- */
   np();
   y=titleAt(M,y+4,'Aspettative');
   let yl=itemsAt(M,CWc,y,[['Stile',s.stili],['Finish',s.finish],['Intensita occhi',s.occhi],['Labbra',s.labbra],['Resistenza',s.resa]]);
-  let yr=itemsAt(X2,CWc,y,[['Riferimenti',s.rif],['Da evitare',s.evitare],['Allergie',s.allergie]]);
+  let yr=itemsAt(X2,CWc,y,[['Abito',[s.abito,s.abitoNote].filter(Boolean).join(' · ')],['Riferimenti',s.rif],['Da evitare',s.evitare],['Allergie',s.allergie]]);
   y=Math.max(yl,yr)+2;
 
   if(v.forma){
