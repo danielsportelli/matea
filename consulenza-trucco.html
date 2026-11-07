@@ -25,6 +25,12 @@
     --safe-x:max(22px, env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
   }
   *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  html,body{ -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
+  input,textarea{ -webkit-user-select:text; user-select:text; }
+  img{ -webkit-user-drag:none; user-drag:none; -webkit-touch-callout:none; }
+  .ph img,.faces svg{ pointer-events:none; }
+  .fh{ font-size:12px; font-weight:600; color:#B5483F; margin-top:6px; }
+  .fh:empty{ display:none; }
   html{ -webkit-text-size-adjust:100%; }
   body{
     background:var(--warm-white); color:var(--charcoal);
@@ -454,8 +460,11 @@ function chips(path,opts,multi){
   const cur=getp(S.rec,path); const set=multi?(cur||[]):[cur];
   return `<div class="chips">${opts.map(o=>`<button type="button" class="chip${set.includes(o)?' on':''}" data-chip="${path}" data-val="${esc(o)}"${multi?' data-multi':''}>${esc(o)}</button>`).join('')}</div>`;
 }
+const EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+function hintFor(type,v){ v=v||''; if(type==='tel'){ const n=v.replace(/\D/g,'').length; return n&&n!==10?`Servono 10 cifre (${n}/10)`:''; } if(type==='email'){ return v&&!EMAIL_RE.test(v)?'Controlla l\'indirizzo email':''; } return ''; }
+const telAttr=' inputmode="numeric" maxlength="10" pattern="[0-9]*"';
 function field(label,path,type,ph){
-  return `<label class="f">${label}</label><input type="${type||'text'}" data-bind="${path}" value="${esc(getp(S.rec,path)||'')}" placeholder="${esc(ph||'')}" autocomplete="off"${type==='tel'?' inputmode="tel"':''}${type==='email'?' inputmode="email" autocapitalize="off"':''}>`;
+  return `<label class="f">${label}</label><input type="${type||'text'}" data-bind="${path}" value="${esc(getp(S.rec,path)||'')}" placeholder="${esc(ph||'')}" autocomplete="off"${type==='tel'?telAttr:''}${type==='email'?' inputmode="email" autocapitalize="off"':''}><div class="fh">${hintFor(type,getp(S.rec,path))}</div>`;
 }
 function area(label,path,ph){
   return `<label class="f">${label}</label><textarea data-bind="${path}" placeholder="${esc(ph||'')}">${esc(getp(S.rec,path)||'')}</textarea>`;
@@ -463,8 +472,8 @@ function area(label,path,ph){
 
 function renderTop(){
   const t=$('#top');
-  if(!S.rec){ t.innerHTML=`<div class="top-row"><span class="logo">MATÉA</span><span class="muted">Make up</span></div>`; return; }
-  t.innerHTML=`<div class="top-row"><button class="linkbtn" data-act="home">‹ Schede</button><span class="logo" style="font-size:18px">MATÉA</span><span class="muted" style="min-width:60px;text-align:right">${S.step+1}/${STEPS.length}</span></div>
+  if(!S.rec){ t.innerHTML=`<div class="top-row"><span class="logo">MATéA</span><span class="muted">Make up</span></div>`; return; }
+  t.innerHTML=`<div class="top-row"><button class="linkbtn" data-act="home">‹ Schede</button><span class="logo" style="font-size:18px">MATéA</span><span class="muted" style="min-width:60px;text-align:right">${S.step+1}/${STEPS.length}</span></div>
   <div class="stepper">${STEPS.map((x,i)=>`<button class="dot${i===S.step?' cur':(i<=(S.rec.step||0)?' done':'')}" data-goto="${i}" aria-label="${x.t}">${i+1}</button>`).join('<span class="bar"></span>')}</div>
   <div class="steplabel">Passo ${S.step+1} di ${STEPS.length} · ${STEPS[S.step].t}</div>`;
 }
@@ -731,7 +740,7 @@ function render(keepScroll){
 }
 
 /* ====================== PANNELLI (bottom sheet) ====================== */
-function nf(label,k,type,ph){ return `<label class="f">${label}</label><input type="${type||'text'}" data-nb="${k}" value="${esc(S.nuovo[k]||'')}" placeholder="${esc(ph||'')}" autocomplete="off"${type==='tel'?' inputmode="tel"':''}${type==='email'?' inputmode="email" autocapitalize="off"':''}>`; }
+function nf(label,k,type,ph){ return `<label class="f">${label}</label><input type="${type||'text'}" data-nb="${k}" value="${esc(S.nuovo[k]||'')}" placeholder="${esc(ph||'')}" autocomplete="off"${type==='tel'?telAttr:''}${type==='email'?' inputmode="email" autocapitalize="off"':''}><div class="fh">${hintFor(type,S.nuovo[k])}</div>`; }
 function renderSheet(){
   const el=$('#sheet'), sh=S.sheet;
   if(!sh){ el.innerHTML=''; document.body.style.overflow=''; return; }
@@ -800,6 +809,9 @@ function closeSheet(){ S.sheet=null; renderSheet(); }
 async function saveNuovo(go){
   const n=S.nuovo;
   if(!n.nome.trim()&&!n.cognome.trim()){ toast('Inserisci almeno nome o cognome'); return; }
+  const dg=(n.tel||'').replace(/\D/g,'');
+  if(n.tel&&dg.length!==10){ toast('Il cellulare deve avere 10 cifre'); return; }
+  if(n.email&&!EMAIL_RE.test(n.email.trim())){ toast('Controlla l\'indirizzo email'); return; }
   if(!n.dataProva){ if(go) n.dataProva=todayIso(); else { toast('Inserisci il giorno della prova'); return; } }
   const r=newRec();
   Object.assign(r.anag,{nome:n.nome.trim(),cognome:n.cognome.trim(),tel:n.tel.trim(),email:n.email.trim(),occasione:n.occasione,dataProva:n.dataProva,oraProva:n.oraProva,dataEvento:n.dataEvento});
@@ -859,12 +871,14 @@ document.addEventListener('click',async e=>{
 document.addEventListener('toggle',e=>{ const d=e.target; if(d.dataset&&d.dataset.how) S.open[d.dataset.how]=d.open; },true);
 document.addEventListener('input',e=>{
   const t=e.target;
+  if(t.type==='tel'&&(t.dataset.bind||t.dataset.nb)){ const dg=t.value.replace(/\D/g,'').slice(0,10); if(dg!==t.value) t.value=dg; }
   if(t.dataset.nb){ S.nuovo[t.dataset.nb]=t.value; }
   else if(t.dataset.sp){ S.sheet[t.dataset.sp]=t.value; }
   else if(t.hasAttribute('data-dd')){ S.sheet.draft.dataEvento=t.value; }
   else if(t.dataset.bind){ setp(S.rec,t.dataset.bind,t.value); touch(); }
   else if(t.dataset.step){ const s=S.rec.prova.steps.find(x=>x.id===t.dataset.step); if(s){ s[t.dataset.k]=t.value; touch(); } }
   else if(t.id==='search'){ S.q=t.value; $('#clist').innerHTML=homeList(); }
+  const fh=t.nextElementSibling; if(fh&&fh.classList&&fh.classList.contains('fh')) fh.textContent=hintFor(t.type,t.value);
 });
 document.addEventListener('change',async e=>{
   const t=e.target;
@@ -915,7 +929,7 @@ async function buildPdf(r){
   const a=r.anag,v=r.viso,c=r.colori,s=r.asp,p=r.prova,d=c.sub&&SD[c.sub];
 
   // intestazione
-  doc.setTextColor(...CH); doc.setFont('times','normal'); doc.setFontSize(24); doc.text('MATÉA',M,y+4,{charSpace:2.4});
+  doc.setTextColor(...CH); doc.setFont('times','normal'); doc.setFontSize(24); doc.text('MATéA',M,y+4,{charSpace:2.4});
   doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...SAGE); doc.text('SKINCARE STUDIO  ·  CONSULENZA TRUCCO',M,y+10,{charSpace:.8});
   y+=17; doc.setDrawColor(...GOLD); doc.setLineWidth(.4); doc.line(M,y,W-M,y); y+=12;
   doc.setTextColor(...CH); doc.setFont('times','bold'); doc.setFontSize(27); doc.text(lat(fullName(r)),M,y); y+=8;
@@ -1008,7 +1022,7 @@ async function buildPdf(r){
 
   const n=doc.getNumberOfPages();
   for(let i=1;i<=n;i++){ doc.setPage(i); doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(...TAUPE);
-    doc.text('Matea Skincare Studio  -  Consulenza trucco',M,H-12); doc.text(i+' / '+n,W-M,H-12,{align:'right'}); }
+    doc.text('Matéa Skincare Studio  -  Consulenza trucco',M,H-12); doc.text(i+' / '+n,W-M,H-12,{align:'right'}); }
   return doc.output('blob');
 }
 
@@ -1033,6 +1047,9 @@ function sharePdf(){ if(S.pdf) shareOrSave(S.pdf.blob,S.pdf.name,'Consulenza tru
   S.list=await dbAll(); render();
   if(useMem) toast('Memoria del browser non disponibile: le schede non verranno salvate');
 })();
+const inField=e=>{ const el=e.target&&e.target.nodeType===1?e.target:(e.target&&e.target.parentElement); return !!(el&&el.closest&&el.closest('input,textarea')); };
+['selectstart','copy','cut','dragstart'].forEach(ev=>document.addEventListener(ev,e=>{ if(!inField(e)) e.preventDefault(); }));
+document.addEventListener('contextmenu',e=>{ if(!inField(e)) e.preventDefault(); });
 window.addEventListener('pagehide',saveNow);
 document.addEventListener('visibilitychange',()=>{ if(document.hidden) saveNow(); });
 })();
