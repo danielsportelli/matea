@@ -5,6 +5,8 @@ Questo repository contiene due cose distinte:
 1. **Il sito pubblico di Matéa Skincare Studio** (`index.html`, `chi-siamo.html`, `metodo.html`, `privacy.html`, cartella `immagini/`).
 2. **Uno strumento interno per Giorgia**: la *Consulenza e prova trucco* (`consulenza-trucco.html`), descritta in questo documento.
 
+Le pagine del sito condividono un foglio di stile comune, **`matea-ui.css`** (titoli in bold con evidenziatore salvia, card per fasi, tecnologie, domande frequenti e informativa privacy): è lo stesso linguaggio visivo dell'app interna. Per cambiare l'aspetto dei titoli o delle card si modifica quel file.
+
 Lo strumento interno **non fa parte del sito**: non è collegato da nessuna pagina, non ha SEO, favicon o tracciamento, ed è marcato `noindex, nofollow`. Usa gli stessi colori e font del sito (Cormorant Garamond + Manrope; `warm-white`, `beige`, `taupe`, `charcoal`, `sage`, `gold`).
 
 > Stato: prima versione completa e funzionante, **salvataggio solo locale** (nel browser del dispositivo). Il passo successivo è il collegamento a Firebase (vedi *Da fare*).
